@@ -1,25 +1,118 @@
 {% load static %}
 
+<!DOCTYPE html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Sistema de Gimnasio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
 </head>
-
 <body>
-    <header>
-        <h1>Inicio</h1>
+    <!-- Header -->
+    <header class="bg-dark text-white text-center py-1">
+        <h1 class="display-5">Bienvenido al Sistema de Gimnasio</h1>
+        <p class="lead">Gestión de tus entrenamientos de manera eficiente</p>
     </header>
-    <nav class="navbar navbar-expand-lg navbar-dark">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="#"></a>
+            <a class="navbar-brand" href="#">Inicio</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">Registrarse</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
-    <main>
-        <h1>Bienvenido</h1>
-        <a href="{% url 'login' %}">Iniciar Sesión</a> |
-        <a href="{% url 'register' %}">Registrarse</a>
+
+    <!-- Main Content -->
+    <main class="container my-5">
+        <!-- Carousel Section -->
+        <div id="carouselExampleIndicators" class="carousel slide mb-5 shadow" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="{% static 'images/1.jpg' %}" class="d-block w-100 rounded" alt="Gym 1">
+                    <div class="carousel-caption bg-dark bg-opacity-50 rounded">
+                        <h5>¡Mantente Activo!</h5>
+                        <p>Accede a tus rutinas desde cualquier lugar.</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{% static 'images/2.jpg' %}" class="d-block w-100 rounded" alt="Gym 2">
+                    <div class="carousel-caption bg-dark bg-opacity-50 rounded">
+                        <h5>Entrenamiento Personalizado</h5>
+                        <p>Recibe recomendaciones adaptadas a ti.</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{% static 'images/3.jpg' %}" class="d-block w-100 rounded" alt="Gym 3">
+                    <div class="carousel-caption bg-dark bg-opacity-50 rounded">
+                        <h5>Alcanza tus Metas</h5>
+                        <p>Con nuestro sistema, tus objetivos están al alcance.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+            </button>
+        </div>
+
+        <!-- Features Section -->
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="card bg-dark text-white shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Gestión de Rutinas</h5>
+                        <p class="card-text">Crea, edita y sigue tus rutinas personalizadas.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-dark text-white shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Seguimiento de Progreso</h5>
+                        <p class="card-text">Revisa tus avances en tiempo real.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-dark text-white shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Soporte 24/7</h5>
+                        <p class="card-text">Contáctanos en cualquier momento para recibir ayuda.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
-    <footer>
-        <p>&copy; 2024 Sistema de Gimnasio</p>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <p>&copy; 2024 Sistema de Gimnasio. Todos los derechos reservados.</p>
     </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+</html>

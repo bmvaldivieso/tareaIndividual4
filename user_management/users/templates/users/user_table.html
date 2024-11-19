@@ -5,60 +5,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
 </head>
 <body>
-    <header>
+    <!-- Header -->
+    <header class="bg-dark text-white text-center py-1">
         <h1>Gestión de Usuarios</h1>
     </header>
+
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="#"></a>
-            <!-- Botón de Cerrar sesión -->
-            <form action="{% url 'logout' %}" method="post" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">Cerrar sesión</button>
-            </form>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <!-- Otros enlaces pueden ir aquí -->
+                </ul>
+                <form action="{% url 'logout' %}" method="post" class="d-flex">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-light">Cerrar sesión</button>
+                </form>
+            </div>
         </div>
     </nav>
-    <main class="container mt-4">
-        <h2 class="mb-3">Lista de Usuarios</h2>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Usuario</th>
-                    <th>Rol</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user.first_name }} {{ user.last_name }}</td>
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.rol }}</td>
-                    <td>
-                        {% if request.user.rol == "administrador" %}
-                        <a href="{% url 'edit_user' user.id %}" class="btn btn-primary btn-sm me-2">Editar</a>
-                        <a href="{% url 'delete_user' user.id %}" class="btn btn-danger btn-sm" 
-                           onclick="return confirm('¿Está seguro de que desea eliminar este usuario?');">Eliminar</a>
-                        {% else %}
-                        <span class="text-muted">No disponible</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center">No hay usuarios registrados.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+    <!-- Main Content -->
+    <main class="container mt-5">
+        <h2 class="text-center mb-4">Lista de Usuarios</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.first_name }} {{ user.last_name }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.rol }}</td>
+                        <td>
+                            {% if request.user.rol == "administrador" %}
+                            <a href="{% url 'edit_user' user.id %}" class="btn btn-primary btn-sm me-2">Editar</a>
+                            <a href="{% url 'delete_user' user.id %}" class="btn btn-danger btn-sm" 
+                               onclick="return confirm('¿Está seguro de que desea eliminar este usuario?');">Eliminar</a>
+                            {% else %}
+                            <span class="text-muted">No disponible</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No hay usuarios registrados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </main>
-    <footer class="bg-dark text-white text-center py-3">
-        <p>&copy; 2024 Sistema de Gimnasio</p>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p>&copy; 2024 Sistema de Gestión</p>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
