@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password, check_password
-from .models import User
+from .models import User, Cliente, Entrenador, Gerente
 from .forms import RegistrationForm, LoginForm
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from .forms import LoginForm
 
 def home(request):
     return render(request, 'users/home.html')
@@ -21,10 +24,6 @@ def register(request):
         form = RegistrationForm()
     return render(request, 'users/register.html', {'form': form})
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from .forms import LoginForm
-
 def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -33,8 +32,8 @@ def login_view(request):
             password = form.cleaned_data['password']
             user = authenticate(username=username, password=password)
             if user is not None:
-                login(request, user)  # Inicia sesión al usuario
-                next_url = request.GET.get('next', 'user_table')  # Si 'next' está en la URL, redirige allí, si no, a 'user_table'
+                login(request, user)
+                next_url = request.GET.get('next', 'gestion')  # Redirige a 'next' si está definido
                 return redirect(next_url)
             else:
                 form.add_error(None, "Credenciales incorrectas.")
@@ -43,20 +42,40 @@ def login_view(request):
     
     return render(request, 'users/login.html', {'form': form})
 
+@login_required
+def gestion(request):
+    rol = getattr(request.user, 'rol', None)  # Usa getattr para evitar errores si 'rol' no existe
+    if rol == 'cliente':
+        return redirect('cliente_page')
+    elif rol == 'entrenador':
+        return redirect('entrenador_dashboard')
+    elif rol == 'gerente':
+        return redirect('gerente_dashboard')
+    else:
+        return render(request, 'users/error.html', {'message': 'Rol desconocido o no asignado.'})
 
 @login_required
-def user_table(request):
-    # Verificar si el usuario está autenticado antes de acceder al atributo 'rol'
-    if request.user.is_authenticated:
-        print(f"El rol del usuario es: {request.user.rol}")
-    else:
-        print("El usuario no está autenticado.")
+def cliente_page(request):
+    # Verifica si el usuario logueado tiene el rol 'cliente'
+    if hasattr(request.user, 'rol') and request.user.rol == 'cliente': 
+        # Obtenemos el cliente correspondiente al usuario logueado
+        cliente = Cliente.objects.get(user=request.user)  # Asegúrate de que 'user' es una relación correcta
+        return render(request, 'users/cliente_page.html', {'cliente': cliente})
     
-    users = User.objects.all()
-    return render(request, 'users/user_table.html', {'users': users})
+@login_required
+def entrenador_dashboard(request):
+    if request.user.rol != 'entrenador':  # Verifica directamente el rol
+        return redirect('gestion')
+    return render(request, 'users/entrenador_dashboard.html', {'user': request.user})
+
+@login_required
+def gerente_dashboard(request):
+    if request.user.rol != 'gerente':  # Verifica directamente el rol
+        return redirect('gestion')
+    return render(request, 'users/gerente_dashboard.html', {'user': request.user})   
 
 def is_admin(user):
-    return user.rol == 'administrador'
+    return user.rol == 'cliente'
 
 @user_passes_test(is_admin)
 def edit_user(request, user_id):
@@ -73,10 +92,9 @@ def edit_user(request, user_id):
         form = RegistrationForm(instance=user)
     return render(request, 'users/edit_user.html', {'form': form, 'user': user})
 
-@user_passes_test(is_admin)
-def delete_user(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    user.delete()
-    return redirect('user_table')
+
+
+
+
 
 

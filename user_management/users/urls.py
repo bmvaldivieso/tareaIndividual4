@@ -7,9 +7,13 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('register/', views.register, name='register'),
     path('login/', views.login_view, name='login'),
-    path('users/', views.user_table, name='user_table'),
     path('edit_user/<int:user_id>/', views.edit_user, name='edit_user'),
-    path('delete_user/<int:user_id>/', views.delete_user, name='delete_user'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('entrenador/dashboard/', views.entrenador_dashboard, name='entrenador_dashboard'),
+    path('gerente/dashboard/', views.gerente_dashboard, name='gerente_dashboard'),
+    path('clientepage/', views.cliente_page, name='cliente_page'),
+    path('gestion/', views.gestion, name='gestion'),
 ]
+
+
 

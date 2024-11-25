@@ -39,11 +39,17 @@
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 <h2 class="text-center mb-4">Iniciar Sesión</h2>
+                <!-- Formulario de inicio de sesión -->
                 <form method="post" class="p-4 rounded shadow bg-dark text-white">
                     {% csrf_token %}
                     {{ form.as_p }}
                     <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
                 </form>
+
+                <!-- Botón de Administración -->
+                <div class="text-center mt-4">
+                    <a href="/admin/" class="btn btn-outline-light w-50">Administración</a>
+                </div>
             </div>
         </div>
     </main>
