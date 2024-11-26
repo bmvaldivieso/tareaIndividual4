@@ -41,9 +41,66 @@
                 <h2 class="text-center mb-4">Registro</h2>
                 <form method="post" class="p-4 rounded shadow bg-dark text-white">
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary w-100">Registrarse</button>
+                    {{ form.non_field_errors }}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}">Usuario</label>
+                        {{ form.username }}
+                    </div>
+                
+                    <div class="mb-3">
+                        <label for="{{ form.first_name.id_for_label }}">Nombre</label>
+                        {{ form.first_name }}
+                    </div>
+                
+                    <div class="mb-3">
+                        <label for="{{ form.last_name.id_for_label }}">Apellido</label>
+                        {{ form.last_name }}
+                    </div>
+                
+                    <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}">Correo electrónico</label>
+                        {{ form.email }}
+                    </div>
+                
+                    <div class="mb-3">
+                        <label for="{{ form.telefono.id_for_label }}">Teléfono</label>
+                        {{ form.telefono }}
+                    </div>
+                
+                    <div class="mb-3">
+                        <label for="{{ form.direccion.id_for_label }}">Dirección</label>
+                        {{ form.direccion }}
+                    </div>
+                
+                    <div class="mb-3">
+                        <label for="{{ form.peso.id_for_label }}">Peso</label>
+                        {{ form.peso }}
+                    </div>
+                
+                    <div class="mb-3">
+                        <label for="{{ form.altura.id_for_label }}">Altura</label>
+                        {{ form.altura }}
+                    </div>
+                
+                    <div class="mb-3">
+                        <label for="{{ form.edad.id_for_label }}">Edad</label>
+                        {{ form.edad }}
+                    </div>
+                
+                    <div class="mb-3">
+                        <label for="{{ form.password1.id_for_label }}">Contraseña</label>
+                        {{ form.password1 }}
+                    </div>
+                
+                    <div class="mb-3">
+                        <label for="{{ form.password2.id_for_label }}">Confirmar Contraseña</label>
+                        {{ form.password2 }}
+                    </div>
+                
+                    <button type="submit" class="btn btn-primary d-block mx-auto">Registrar</button>
                 </form>
+                
             </div>
         </div>
     </main>

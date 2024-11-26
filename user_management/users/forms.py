@@ -1,111 +1,78 @@
 from django import forms
-from .models import User, Cliente, Entrenador, Gerente
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+from .models import User, Cliente
 
-class RegistrationForm(forms.ModelForm):
-    password_confirm = forms.CharField(
-        widget=forms.PasswordInput(),
-        label="Confirmar Contraseña"  # Alias personalizado para este campo
+class RegistrationForm(UserCreationForm):
+    direccion = forms.CharField(max_length=255, required=False, label='Dirección')
+    peso = forms.CharField(max_length=15, required=False, label='Peso')
+    altura = forms.CharField(max_length=15, required=False, label='Altura')
+    edad = forms.CharField(max_length=15, required=False, label='Edad')
+
+    username = forms.CharField(
+        max_length=150, 
+        required=True, 
+        label='Nombre de usuario', 
+        widget=forms.TextInput(attrs={'aria-label': 'Nombre de usuario', 'placeholder': 'Nombre de usuario'}),
+        error_messages={'required': '', 'max_length': ''} 
+    )
+
+    password1 = forms.CharField(
+        label='Contraseña',
+        widget=forms.PasswordInput(attrs={'aria-label': 'Contraseña', 'placeholder': 'Contraseña'}),
+        error_messages={
+            'required': 'Este campo es obligatorio.',
+            'min_length': 'La contraseña debe contener al menos 8 caracteres.',
+            'password_too_similar': 'Tu contraseña no puede ser demasiado similar a tu otra información personal.',
+            'common_password': 'La contraseña no puede ser una contraseña comúnmente usada.',
+            'numeric_password': 'La contraseña no puede ser completamente numérica.',
+        }
+    )
+
+    password2 = forms.CharField(
+        label='Confirmar contraseña',
+        widget=forms.PasswordInput(attrs={'aria-label': 'Confirmar contraseña', 'placeholder': 'Confirmar contraseña'}),
+        error_messages={'required': 'Este campo es obligatorio.'}
     )
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'username', 'password', 'telefono', 'rol']
+        fields = ['username', 'first_name', 'last_name', 'email', 'telefono', 'direccion', 'peso', 'altura', 'edad', 'password1', 'password2']
         labels = {
+            'username': 'Nombre de usuario',
             'first_name': 'Nombre',
             'last_name': 'Apellido',
-            'email': 'Correo Electrónico',
-            'username': 'Nombre de Usuario',
-            'password': 'Contraseña',
+            'email': 'Correo electrónico',
             'telefono': 'Teléfono',
-            'rol': 'Rol',
-        }
-        help_texts = {
-            'username': '',  # Elimina el texto de ayuda predeterminado
+            'password1': 'Contraseña',
+            'password2': 'Confirmar contraseña',
         }
 
-    def clean_password_confirm(self):
-        password = self.cleaned_data.get('password')
-        password_confirm = self.cleaned_data.get('password_confirm')
+    def save(self, commit=True):
+        # Guarda el usuario principal
+        user = super().save(commit=False)
+        user.rol = 'cliente'  # Asigna el rol por defecto
+        if commit:
+            user.save()
+            # Crea una instancia de Cliente asociada al usuario
+            Cliente.objects.create(
+                user=user,
+                direccion=self.cleaned_data.get('direccion', ''),
+                peso=self.cleaned_data.get('peso', ''),
+                altura=self.cleaned_data.get('altura', ''),
+                edad=self.cleaned_data.get('edad', '')
+            )
+        return user
 
-        if password != password_confirm:
-            raise forms.ValidationError("Las contraseñas no coinciden.")
-        return password_confirm
+    def clean_username(self):
+        # Si es una edición, no validamos la unicidad del username
+        username = self.cleaned_data.get('username')
+        if self.instance and self.instance.username == username:
+            return username
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("Este nombre de usuario ya existe.")
+        return username
+
 
 class LoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput)
-
-class ClienteForm(forms.ModelForm):
-    class Meta:
-        model = Cliente
-        fields = ['direccion']
-
-class EntrenadorForm(forms.ModelForm):
-    class Meta:
-        model = Entrenador
-        fields = ['especialidad']
-
-class GerenteForm(forms.ModelForm):
-    class Meta:
-        model = Gerente
-        fields = ['area_responsable']
-
-@login_required
-def cliente_edit(request):
-    """
-    Permite a un cliente editar su información específica.
-    """
-    if not hasattr(request.user, 'cliente'):
-        return redirect('dashboard')  # Redirige si no es un cliente
-
-    cliente = request.user.cliente
-    if request.method == 'POST':
-        form = ClienteForm(request.POST, instance=cliente)
-        if form.is_valid():
-            form.save()
-            return redirect('cliente_dashboard')
-    else:
-        form = ClienteForm(instance=cliente)
-
-    return render(request, 'users/cliente_edit.html', {'form': form})
-
-@login_required
-def entrenador_edit(request):
-    """
-    Permite a un entrenador editar su información específica.
-    """
-    if not hasattr(request.user, 'entrenador'):
-        return redirect('dashboard')  # Redirige si no es un entrenador
-
-    entrenador = request.user.entrenador
-    if request.method == 'POST':
-        form = EntrenadorForm(request.POST, instance=entrenador)
-        if form.is_valid():
-            form.save()
-            return redirect('entrenador_dashboard')
-    else:
-        form = EntrenadorForm(instance=entrenador)
-
-    return render(request, 'users/entrenador_edit.html', {'form': form})
-
-
-@login_required
-def gerente_edit(request):
-    """
-    Permite a un gerente editar su información específica.
-    """
-    if not hasattr(request.user, 'gerente'):
-        return redirect('dashboard')  # Redirige si no es un gerente
-
-    gerente = request.user.gerente
-    if request.method == 'POST':
-        form = GerenteForm(request.POST, instance=gerente)
-        if form.is_valid():
-            form.save()
-            return redirect('gerente_dashboard')
-    else:
-        form = GerenteForm(instance=gerente)
-
-    return render(request, 'users/gerente_edit.html', {'form': form})

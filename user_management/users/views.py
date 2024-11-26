@@ -1,13 +1,9 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.hashers import make_password, check_password
-from .models import User, Cliente, Entrenador, Gerente
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.hashers import make_password
+from .models import User, Cliente
 from .forms import RegistrationForm, LoginForm
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth import authenticate, login
-from .forms import LoginForm
 
 def home(request):
     return render(request, 'users/home.html')
@@ -16,10 +12,11 @@ def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.password = make_password(form.cleaned_data['password'])
-            user.save()
-            return redirect('login')
+            try:
+                form.save()
+                return redirect('login')
+            except Exception as e:
+                form.add_error(None, f"Ocurrió un error al registrar: {str(e)}")
     else:
         form = RegistrationForm()
     return render(request, 'users/register.html', {'form': form})
@@ -74,27 +71,43 @@ def gerente_dashboard(request):
         return redirect('gestion')
     return render(request, 'users/gerente_dashboard.html', {'user': request.user})   
 
-def is_admin(user):
+def is_cliente(user):
     return user.rol == 'cliente'
 
-@user_passes_test(is_admin)
+@login_required
+@user_passes_test(is_cliente)
 def edit_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
+    cliente = get_object_or_404(Cliente, user=user)
+
     if request.method == 'POST':
         form = RegistrationForm(request.POST, instance=user)
         if form.is_valid():
+            # Guardar el usuario
             user = form.save(commit=False)
-            if form.cleaned_data['password']:
-                user.password = make_password(form.cleaned_data['password'])
+
+            # Verificar si se proporciona una nueva contraseña
+            if form.cleaned_data['password1']:
+                user.password = make_password(form.cleaned_data['password1'])  # Cifrar la contraseña
+
             user.save()
-            return redirect('user_table')
+
+            # Vuelve a autenticar al usuario si la contraseña cambió
+            login(request, user)  # Esto es clave
+
+            # Actualizar los datos de Cliente
+            cliente.direccion = form.cleaned_data['direccion']
+            cliente.peso = form.cleaned_data['peso']
+            cliente.altura = form.cleaned_data['altura']
+            cliente.edad = form.cleaned_data['edad']
+            cliente.save()
+
+            return redirect('cliente_page')
     else:
         form = RegistrationForm(instance=user)
+        form.initial['direccion'] = cliente.direccion
+        form.initial['peso'] = cliente.peso
+        form.initial['altura'] = cliente.altura
+        form.initial['edad'] = cliente.edad
+
     return render(request, 'users/edit_user.html', {'form': form, 'user': user})
-
-
-
-
-
-
-
