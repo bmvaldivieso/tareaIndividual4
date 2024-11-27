@@ -30,7 +30,7 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                next_url = request.GET.get('next', 'gestion')  # Redirige a 'next' si está definido
+                next_url = request.GET.get('next', 'gestion')  
                 return redirect(next_url)
             else:
                 form.add_error(None, "Credenciales incorrectas.")
@@ -56,7 +56,7 @@ def cliente_page(request):
     # Verifica si el usuario logueado tiene el rol 'cliente'
     if hasattr(request.user, 'rol') and request.user.rol == 'cliente': 
         # Obtenemos el cliente correspondiente al usuario logueado
-        cliente = Cliente.objects.get(user=request.user)  # Asegúrate de que 'user' es una relación correcta
+        cliente = Cliente.objects.get(user=request.user)  
         return render(request, 'users/cliente_page.html', {'cliente': cliente})
     
 @login_required
@@ -93,7 +93,7 @@ def edit_user(request, user_id):
             user.save()
 
             # Vuelve a autenticar al usuario si la contraseña cambió
-            login(request, user)  # Esto es clave
+            login(request, user) 
 
             # Actualizar los datos de Cliente
             cliente.direccion = form.cleaned_data['direccion']
