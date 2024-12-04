@@ -2,34 +2,45 @@
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio - Sistema de Gimnasio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
+        rel="stylesheet">
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
 </head>
+
 <body>
-    <!-- Header -->
-    <header class="bg-dark text-white text-center py-1">
-        <h1 class="display-5">Bienvenido al Sistema de Gimnasio</h1>
-        <p class="lead">Gestión de tus entrenamientos de manera eficiente</p>
-    </header>
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">Inicio</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <div class="d-flex align-items-center mb-3">
+                <img src="{% static 'images/logo3.png' %}" alt="Logo GymActive" style="height: 50px;">
+                <span class="ms-2 fs-5 fw-bold">GymActive</span>
+            </div>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Iniciar Sesión</a>
+                        <a class="nav-link" href="{% url 'home' %}">Inicio</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'register' %}">Registrarse</a>
+                        <a class="nav-link" href="{% url 'home' %}">Programa</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Precios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Comunidad</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-primary me-2" href="{% url 'login' %}">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary" href="{% url 'register' %}">Registrarse</a>
                     </li>
                 </ul>
             </div>
@@ -41,9 +52,12 @@
         <!-- Carousel Section -->
         <div id="carouselExampleIndicators" class="carousel slide mb-5 shadow" data-bs-ride="carousel">
             <div class="carousel-indicators">
-                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
+                    aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
+                    aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
+                    aria-label="Slide 3"></button>
             </div>
             <div class="carousel-inner">
                 <div class="carousel-item active">
@@ -68,51 +82,132 @@
                     </div>
                 </div>
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
+                data-bs-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Anterior</span>
             </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
+                data-bs-slide="next">
                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Siguiente</span>
             </button>
         </div>
 
         <!-- Features Section -->
-        <div class="row text-center">
-            <div class="col-md-4">
-                <div class="card bg-dark text-white shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Gestión de Rutinas</h5>
-                        <p class="card-text">Crea, edita y sigue tus rutinas personalizadas.</p>
+        <div class="features-section container">
+            <h2 class="text-center text-white mb-4">Explora nuestro programa</h2>
+            <div class="features-slider d-flex align-items-center">
+                <!-- Tarjeta 1 -->
+                <div class="card feature-card bg-dark text-white mx-2">
+                    <div class="card-body text-start">
+                        <i class="icon-strength mb-3"></i>
+                        <h5 class="card-title">Fuerza</h5>
+                        <p class="card-text">El objetivo de este entrenamiento es mejorar tanto la resistencia
+                            cardiovascular como la fortaleza muscular en una misma sesión.</p>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-dark text-white shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Seguimiento de Progreso</h5>
-                        <p class="card-text">Revisa tus avances en tiempo real.</p>
+                <!-- Tarjeta 2 -->
+                <div class="card feature-card active-card mx-2">
+                    <div class="card-body text-start">
+                        <i class="icon-cardio mb-3"></i>
+                        <h5 class="card-title">Cardio Fuerza</h5>
+                        <p class="card-text">El objetivo de este entrenamiento es mejorar tanto la resistencia
+                            cardiovascular como la fortaleza muscular en una misma sesión.</p>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-dark text-white shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Soporte 24/7</h5>
-                        <p class="card-text">Contáctanos en cualquier momento para recibir ayuda.</p>
+                <!-- Tarjeta 3 -->
+                <div class="card feature-card bg-dark text-white mx-2">
+                    <div class="card-body text-start">
+                        <i class="icon-weight mb-3"></i>
+                        <h5 class="card-title">Pérdida de Grasa</h5>
+                        <p class="card-text">Se refiere a reducir el porcentaje de grasa corporal mediante una
+                            combinación de entrenamiento específico, nutrición adecuada y descanso.</p>
+                    </div>
+                </div>
+                <!-- Tarjeta 4 -->
+                <div class="card feature-card bg-dark text-white mx-2">
+                    <div class="card-body text-start">
+                        <i class="icon-muscle mb-3"></i>
+                        <h5 class="card-title">Ganancia Muscular</h5>
+                        <p class="card-text">Los ejercicios de resistencia como levantamiento de pesas, ejercicios con
+                            el propio peso corporal son fundamentales.</p>
+                    </div>
+                </div>
+                <!-- Tarjeta 5 -->
+                <div class="card feature-card bg-dark text-white mx-2">
+                    <div class="card-body text-start">
+                        <i class="icon-nutrition mb-3"></i>
+                        <h5 class="card-title">Nutrición</h5>
+                        <p class="card-text">Los carbohidratos presentes en alimentos integrales, frutas y verduras son
+                            clave para tu energía.</p>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Sección de Suscripción -->
+        <div class="subscription-section text-center text-white py-5">
+            <p class="mb-3">Suscríbete a nuestros consejos de fitness</p>
+            <p class="mb-4">Comunica claramente los beneficios de suscribirse, como contenido exclusivo y noticias de
+                última hora.</p>
+            <input type="email" class="form-control email-input me-2" placeholder="Correo Electrónico"
+                aria-label="Correo Electrónico">
+            <button class="btn btn-dark subscribe-btn">Suscribirse</button>
+        </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-4 mt-5">
-        <p>&copy; 2024 Sistema de Gimnasio. Todos los derechos reservados.</p>
+    <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Logo y descripción -->
+                <div class="col-md-4 text-start">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{% static 'images/logo3.png' %}" alt="Logo GymActive" style="height: 50px;">
+                        <span class="ms-2 fs-5 fw-bold">GymActive</span>
+                    </div>
+                    <p>Destacar los beneficios de cada ejercicio, tanto físicos como mentales.</p>
+                </div>
+
+                <!-- Mapa del sitio -->
+                <div class="col-md-4 text-start">
+                    <h5 class="fw-bold">Mapa del sitio</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white text-decoration-none">Acerca de nosotros</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Promociones</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Noticias y blog</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Centro de ayuda</a></li>
+                    </ul>
+                </div>
+                <!-- Soporte -->
+                <div class="col-md-2 text-start">
+                    <h5 class="fw-bold">Soporte</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white text-decoration-none">FAQ</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Centro de soporte</a></li>
+                    </ul>
+                </div>
+                <!-- Redes sociales -->
+                <div class="col-md-2 text-start">
+                    <h5 class="fw-bold">Redes sociales</h5>
+                    <a href="#" class="text-white text-decoration-none me-3"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-white text-decoration-none me-3"><i class="bi bi-twitter"></i></a>
+                    <a href="#" class="text-white text-decoration-none"><i class="bi bi-facebook"></i></a>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="row mt-3">
+                <div class="col-12 text-center">
+                    <p>&copy; 2024 GymActive. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

@@ -4,13 +4,30 @@ body {
     color: #ffffff;
     font-family: 'Roboto', sans-serif;
     padding: 0;
-    margin: 0;  /* Elimina márgenes */
+    margin: 0;  
 }
+
+footer a:hover {
+    color: #ccc;
+    text-decoration: underline;
+}
+
+.navbar-logo{
+    display: inline-block;
+    vertical-align: middle;
+    width: 70px;
+}
+
+.navbar-logo img{
+    display: block;
+    width: auto;
+    height: auto;
+  }
 
 /* Navbar */
 .navbar {
     background-color: #1f1f1f;
-    border-bottom: 2px solid #ff5722;
+    border-bottom: 2px solid #097FD9;
     padding: 10px;
 }
 .navbar a {
@@ -20,19 +37,20 @@ body {
     transition: color 0.3s ease;
 }
 .navbar a:hover {
-    color: #ff7043;
+    color: #097FD9;
 }
 
 /* Botones */
 .btn {
-    background-color: #ff5722;
+    background-color: #097FD9;
     color: #ffffff;
     border: none;
     transition: all 0.3s ease;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
 }
+
 .btn:hover {
-    background-color: #ff7043;
+    background-color: #097FD9;
     color: #000000;
     box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.3);
 }
@@ -52,7 +70,7 @@ form {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5);
-    margin-bottom: 20px; /* Añadir espacio inferior */
+    margin-bottom: 20px; 
 }
 input, select, textarea {
     background-color: #2b2b2b;
@@ -65,8 +83,8 @@ input, select, textarea {
     transition: border-color 0.3s ease;
 }
 input:focus, select:focus, textarea:focus {
-    border-color: #ff5722;
-    box-shadow: 0 0 5px #ff5722;
+    border-color: #097FD9;
+    box-shadow: 0 0 5px #097FD9;
     outline: none;
 }
 
@@ -78,10 +96,10 @@ table {
 }
 table thead {
     background-color: #1f1f1f;
-    border-bottom: 2px solid #ff5722; /* Agregar borde para separación */
+    border-bottom: 2px solid #097FD9; 
 }
 table thead th {
-    color: #ff5722;
+    color: #097FD9;
     padding: 15px;
 }
 table tbody tr {
@@ -102,19 +120,19 @@ table td, table th {
 
 /* Títulos */
 h1, h2, h3, h4, h5, h6 {
-    color: #ff5722;
+    color: #097FD9;
     font-weight: bold;
     font-family: 'Poppins', sans-serif;
 }
 
 /* Links */
 a {
-    color: #ff5722;
+    color: #097FD9;
     text-decoration: none;
 }
 a:hover {
     text-decoration: underline;
-    color: #ff7043;
+    color: #097FD9;
 }
 
 /* Footer */
@@ -123,7 +141,7 @@ footer {
     color: #ffffff;
     text-align: center;
     padding: 10px;
-    border-top: 2px solid #ff5722;
+    border-top: 2px solid #097FD9;
 }
 
 /* Adaptación para dispositivos móviles */
@@ -143,6 +161,18 @@ footer {
     table td, table th {
         padding: 10px;
     }
+    .subscription-form {
+        flex-direction: column;
+    }
+
+    .subscription-form input {
+        margin-bottom: 1rem;
+        max-width: 100%;
+    }
+
+    .subscription-form button {
+        width: 100%;
+    }
 }
 
 /* Encabezado */
@@ -157,5 +187,112 @@ header {
 .sidebar-custom {
     background-color: #3f464f;
 }
+
+/* General */
+.features-section {
+    overflow: hidden;
+}
+
+.features-slider {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+/* Tarjetas */
+.feature-card {
+    flex: 0 0 auto;
+    width: 250px;
+    border-radius: 10px;
+    transition: transform 0.3s, background-color 0.3s;
+}
+
+.feature-card .card-body {
+    padding: 1.5rem;
+}
+
+.feature-card h5 {
+    font-weight: bold;
+}
+
+.feature-card p {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.feature-card.active-card {
+    background-color: #097FD9;
+    color: #ffffff;
+    transform: scale(1.05);
+}
+
+.feature-card i {
+    font-size: 2rem;
+    color: #097FD9;
+}
+
+.feature-card.active-card i {
+    color: #ffffff;
+}
+
+/* Scroll Personalizado */
+.features-slider::-webkit-scrollbar {
+    height: 6px;
+}
+
+.features-slider::-webkit-scrollbar-thumb {
+    background: #097FD9;
+    border-radius: 10px;
+}
+
+/* Sección de Suscripción */
+.subscription-section {
+    background-color: #097FD9; 
+    border-radius: 10px;
+    margin: 2rem auto; 
+    padding: 2rem 1rem; 
+    width: 75%; 
+    max-width: 1200px; 
+    min-height: 200px; 
+}
+
+.subscription-section p {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+}
+
+.subscription-form input {
+    width: auto;           
+    max-width: 300px;      
+    border-radius: 20px;   
+    border: 1px solid #ffffff; 
+    padding: 0.6rem 1rem;  
+    display: block;        
+    margin: 0 auto;        
+}
+
+.subscription-form button {
+    border-radius: 20px;
+    padding: 0.6rem 1.5rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.subscription-form button:hover {
+    background-color: #ffffff;
+    color: #000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#carouselExampleIndicators .carousel-inner img {
+    max-width: 90%; 
+    height: auto;   
+    object-position: center;
+    margin: 5px auto;
+}
+
+
 
 
