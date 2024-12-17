@@ -11,7 +11,7 @@ class User(AbstractUser):
     ]
 
     telefono = models.CharField(max_length=15, blank=True, null=True)
-    rol = models.CharField(max_length=20, choices=ROLE_CHOICES)\
+    rol = models.CharField(max_length=20, choices=ROLE_CHOICES)
     
     class Meta:
         db_table = 'usuario'

@@ -16,7 +16,7 @@ def register(request):
                 form.save()
                 return redirect('login')
             except Exception as e:
-                form.add_error(None, f"Ocurrió un error al registrar: {str(e)}")
+                form.add_error(None, f"Ocurrió un error al registrar: {str(e)}")    
     else:
         form = RegistrationForm()
     return render(request, 'users/register.html', {'form': form})

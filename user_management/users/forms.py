@@ -12,7 +12,7 @@ class RegistrationForm(UserCreationForm):
         max_length=150, 
         required=True, 
         label='Nombre de usuario', 
-        widget=forms.TextInput(attrs={'aria-label': 'Nombre de usuario', 'placeholder': 'Nombre de usuario'}),
+        widget=forms.TextInput(attrs={'aria-label': 'Nombre de usuario'}),
         error_messages={'required': '', 'max_length': ''} 
     )
 
