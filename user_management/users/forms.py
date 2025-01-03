@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, Cliente
+from .models import User, Cliente, EvaluacionFisica
 
 class RegistrationForm(UserCreationForm):
     direccion = forms.CharField(max_length=255, required=False, label='Dirección')
@@ -76,3 +76,43 @@ class RegistrationForm(UserCreationForm):
 class LoginForm(forms.Form):
     username = forms.CharField(label="Usuario")
     password = forms.CharField(widget=forms.PasswordInput, label="Contraseña")
+
+class EvaluationFisicaForm(forms.ModelForm):
+    class Meta:
+        model = EvaluacionFisica
+        fields = ['peso', 'porcentaje_grasa', 'resistencia_fisica', 'fecha_registro', 'notas_adicionales']
+        widgets = {
+            'fecha_registro': forms.DateInput(attrs={'type': 'date'}),
+            'notas_adicionales': forms.Textarea(attrs={
+                'rows': 6,  # Número de filas
+                'cols': 40,  # Número de columnas
+            }),
+        }
+        labels = {
+            'peso': 'Peso',
+            'porcentaje_grasa': 'Porcentaje de Grasa',
+            'resistencia_fisica': 'Resistencia Física',
+            'fecha_registro': 'Fecha del Registro',
+            'notas_adicionales': 'Notas Adicionales',
+        }
+        help_texts = {
+            'peso': 'Ingrese su peso en kilogramos.',
+            'porcentaje_grasa': 'Ingrese el porcentaje de grasa corporal.',
+            'resistencia_fisica': 'Describa su nivel de resistencia física.',
+            'fecha_registro': 'Seleccione la fecha en que se realizó la evaluación.',
+            'notas_adicionales': 'Agregue cualquier información adicional relevante (opcional).',
+        }
+
+    def clean_peso(self):
+        peso = self.cleaned_data.get('peso')
+        if peso <= 0:
+            raise forms.ValidationError("El peso debe ser un número positivo.")
+        return peso
+
+    def clean_porcentaje_grasa(self):
+        porcentaje_grasa = self.cleaned_data.get('porcentaje_grasa')
+        if porcentaje_grasa < 0 or porcentaje_grasa > 100:
+            raise forms.ValidationError("El porcentaje de grasa debe estar entre 0 y 100.")
+        return porcentaje_grasa
+    
+    

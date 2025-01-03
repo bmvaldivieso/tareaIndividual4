@@ -2,6 +2,11 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from .views import (
+    EvaluacionFisicaCreateView,
+    EvaluacionFisicaListView,
+    EvaluacionFisicaUpdateView,
+)
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -13,6 +18,9 @@ urlpatterns = [
     path('gerente/dashboard/', views.gerente_dashboard, name='gerente_dashboard'),
     path('clientepage/', views.cliente_page, name='cliente_page'),
     path('gestion/', views.gestion, name='gestion'),
+    path('evaluaciones/', EvaluacionFisicaListView.as_view(), name='evaluaciones_list'),
+    path('evaluaciones/nueva/', EvaluacionFisicaCreateView.as_view(), name='evaluacionfisica_create'),
+    path('evaluaciones/<int:pk>/editar/', EvaluacionFisicaUpdateView.as_view(), name='evaluacionfisica_update'),
 ] 
 
 

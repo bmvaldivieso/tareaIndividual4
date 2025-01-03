@@ -185,7 +185,11 @@ header {
 
 /* Sidebar */
 .sidebar-custom {
-    background-color: #3f464f;
+    height: 100%; /* Ajusta la altura según el contenido */
+    background-color: #3f464f; /* Asegúrate de mantener un fondo sólido */
+    display: flex;
+    flex-direction: column; /* Asegura que los elementos del sidebar se apilen verticalmente */
+    justify-content: space-between; /* Distribuye elementos al inicio y final */
 }
 
 /* General */
@@ -292,6 +296,7 @@ header {
     object-position: center;
     margin: 5px auto;
 }
+
 
 
 

@@ -1,5 +1,6 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinValueValidator
 
 class User(AbstractUser):  
     ADMIN = 'administrador'
@@ -53,4 +54,20 @@ class Gerente(models.Model):
 
     def __str__(self):
         return f"Gerente: {self.user.username}"
+    
+class EvaluacionFisica(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    peso = models.FloatField(validators=[MinValueValidator(0.0)])
+    porcentaje_grasa = models.FloatField(validators=[MinValueValidator(0.0)])
+    resistencia_fisica = models.CharField(max_length=100)
+    fecha_registro = models.DateField(db_index=True)
+    notas_adicionales = models.TextField(blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_ultima_actualizacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'evaluacionfisica'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.record_date}"   
 

@@ -1,9 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password
-from .models import User, Cliente
-from .forms import RegistrationForm, LoginForm
+from .models import User, Cliente, EvaluacionFisica
+from .forms import RegistrationForm, LoginForm, EvaluationFisicaForm
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth import authenticate, login
+
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, ListView, UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 def home(request):
     return render(request, 'users/home.html')
@@ -111,3 +115,47 @@ def edit_user(request, user_id):
         form.initial['edad'] = cliente.edad
 
     return render(request, 'users/edit_user.html', {'form': form, 'user': user})
+
+# Vista para crear una evaluación física
+class EvaluacionFisicaCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = EvaluacionFisica
+    form_class = EvaluationFisicaForm
+    template_name = 'users/evaluacionfisica_form.html'
+    success_url = reverse_lazy('evaluaciones_list')  # Redirige a la lista después de crear
+
+    def form_valid(self, form):
+        # Asocia la evaluación al usuario logueado
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+    def test_func(self):
+        # Solo los usuarios con el rol 'cliente' pueden crear evaluaciones
+        return self.request.user.rol == 'cliente'
+
+
+# Vista para listar las evaluaciones físicas
+class EvaluacionFisicaListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = EvaluacionFisica
+    template_name = 'users/evaluacionfisica_list.html'
+    context_object_name = 'evaluaciones'
+
+    def get_queryset(self):
+        # Filtra las evaluaciones del usuario logueado
+        return EvaluacionFisica.objects.filter(user=self.request.user)
+
+    def test_func(self):
+        # Solo los usuarios con el rol 'cliente' pueden ver sus evaluaciones
+        return self.request.user.rol == 'cliente'
+
+
+# Vista para actualizar una evaluación física
+class EvaluacionFisicaUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = EvaluacionFisica
+    form_class = EvaluationFisicaForm
+    template_name = 'users/evaluacionfisica_form.html'
+    success_url = reverse_lazy('evaluaciones_list')  # Redirige a la lista después de actualizar
+
+    def test_func(self):
+        # Verifica si el usuario es el propietario de la evaluación
+        evaluacion = self.get_object()
+        return self.request.user.rol == 'cliente' and evaluacion.user == self.request.user
