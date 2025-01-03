@@ -87,6 +87,11 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="{{ form.cedula.id_for_label }}">Cédula</label>
+                        {{ form.cedula }}
+                    </div>
+
+                    <div class="mb-3">
                         <label for="{{ form.password1.id_for_label }}">Contraseña</label>
                         {{ form.password1 }}
                         <div id="passwordStrength" class="mt-1"></div>
@@ -135,6 +140,7 @@
         const peso = document.querySelector('#id_peso');
         const altura = document.querySelector('#id_altura');
         const edad = document.querySelector('#id_edad');
+        const cedula = document.querySelector('#id_cedula');
         const form = document.getElementById('registrationForm');
         const password1 = document.querySelector('#id_password1');
         const password2 = document.querySelector('#id_password2');
@@ -188,6 +194,9 @@
         });
         edad.addEventListener('input', () => {
             edad.value = edad.value.replace(/[^0-9]/g, '');
+        });
+        cedula.addEventListener('input', () => {
+            cedula.value = cedula.value.replace(/[^0-9]/g, '');
         });
 
         // Verificación de contraseñas coincidentes

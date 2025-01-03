@@ -1,12 +1,13 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, Cliente, EvaluacionFisica
+from .models import User, Cliente, EvaluacionFisica, Entrenador
 
 class RegistrationForm(UserCreationForm):
     direccion = forms.CharField(max_length=255, required=False, label='Dirección')
     peso = forms.CharField(max_length=15, required=False, label='Peso')
     altura = forms.CharField(max_length=15, required=False, label='Altura')
     edad = forms.CharField(max_length=15, required=False, label='Edad')
+    cedula = forms.CharField(max_length=15, required=False, label='Cedula')
 
     username = forms.CharField(
         max_length=150, 
@@ -45,6 +46,7 @@ class RegistrationForm(UserCreationForm):
             'telefono': 'Teléfono',
             'password1': 'Contraseña',
             'password2': 'Confirmar contraseña',
+            'cedula': 'Cédula',
         }
 
     def save(self, commit=True):
@@ -59,7 +61,8 @@ class RegistrationForm(UserCreationForm):
                 direccion=self.cleaned_data.get('direccion', ''),
                 peso=self.cleaned_data.get('peso', ''),
                 altura=self.cleaned_data.get('altura', ''),
-                edad=self.cleaned_data.get('edad', '')
+                edad=self.cleaned_data.get('edad', ''),
+                cedula=self.cleaned_data.get('cedula', ''),
             )
         return user
 
@@ -114,5 +117,74 @@ class EvaluationFisicaForm(forms.ModelForm):
         if porcentaje_grasa < 0 or porcentaje_grasa > 100:
             raise forms.ValidationError("El porcentaje de grasa debe estar entre 0 y 100.")
         return porcentaje_grasa
+    
+class EntrenadorForm(forms.ModelForm):
+    class Meta:
+        model = Entrenador
+        fields = ['especialidad', 'direccion', 'cedula', 'experiencia_laboral', 'idioma1', 'idioma2', 'cargo']
+        widgets = {
+            'direccion': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Ciudad donde reside'}),
+            'especialidad': forms.TextInput(attrs={'placeholder': 'Musculación, cardio, yoga'}),
+            'cedula': forms.TextInput(attrs={'placeholder': 'Numero de cédula'}),
+            'experiencia_laboral': forms.TextInput(attrs={'placeholder': 'Años de experiencia'}),
+            'idioma1': forms.TextInput(attrs={'placeholder': 'Que domina'}),
+            'idioma2': forms.TextInput(attrs={'placeholder': 'Que domina'}),
+            'cargo': forms.TextInput(attrs={'placeholder': 'Que estaria interesado'}),
+        }
+
+class UserEntrenadorForm(forms.ModelForm):
+    username = forms.CharField(
+        max_length=150, 
+        required=True, 
+        label='Nombre de usuario', 
+        widget=forms.TextInput(attrs={'placeholder': 'Nombre de usuario'}),
+        error_messages={'required': '', 'max_length': ''} 
+    )
+    
+    password1 = forms.CharField(
+        label='Contraseña',
+        widget=forms.PasswordInput(attrs={'aria-label': 'Contraseña', 'placeholder': 'Contraseña'}),
+        error_messages={
+            'required': 'Este campo es obligatorio.',
+            'min_length': 'La contraseña debe contener al menos 8 caracteres.',
+            'password_too_similar': 'Tu contraseña no puede ser demasiado similar a tu otra información personal.',
+            'common_password': 'La contraseña no puede ser una contraseña comúnmente usada.',
+            'numeric_password': 'La contraseña no puede ser completamente numérica.',
+        }
+    )
+
+    password2 = forms.CharField(
+        label='Confirmar contraseña',
+        widget=forms.PasswordInput(attrs={'aria-label': 'Confirmar contraseña', 'placeholder': 'Confirmar contraseña'}),
+        error_messages={'required': 'Este campo es obligatorio.'}
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'telefono']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'placeholder': 'Nombre'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Apellido'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Correo electrónico'}),
+            'telefono': forms.TextInput(attrs={'placeholder': 'Teléfono'}),
+        }
+        labels = {
+            'first_name': 'Nombre',
+            'last_name': 'Apellido',
+            'email': 'Correo electrónico',
+            'telefono': 'Teléfono',
+            'cedula': 'Cédula',
+        }
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.rol = 'entrenador'  # Asignar el rol automáticamente
+        user.set_password(self.cleaned_data['password1'])  # Establecer la contraseña
+        if commit:
+            user.save()
+        return user      
+
+
+          
     
     

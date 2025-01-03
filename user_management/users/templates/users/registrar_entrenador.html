@@ -1,0 +1,165 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Entrenador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"></a>
+
+            <!-- Boton a la izquierda -->
+            <a href="{% url 'home' %}">Inicio</a>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <!-- Aquí irían mas elementos de navegación -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <h2 class="text-center">Registro</h2>
+                <form id="registrationForm" method="post" class="p-4 rounded shadow bg-dark text-white">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        {{ user_form.username }}
+                    </div>
+                    <div class="mb-3">
+                        {{ user_form.first_name }}
+                    </div>
+                    <div class="mb-3">
+                        {{ user_form.last_name }}
+                    </div>
+                    <div class="mb-3">
+                        {{ user_form.email }}
+                    </div>
+                    <div class="mb-3">
+                        {{ user_form.telefono }}
+                    </div>
+                    <div class="mb-3">
+                        {{ entrenador_form.as_p }}
+                    </div>
+                    <!-- Campos de las contraseñas al final -->
+                    <div class="mb-3">
+                        <label for="{{ user_form.password1.id_for_label }}">Contraseña:</label>
+                        {{ user_form.password1 }}
+                        <div id="passwordStrength" class="mt-1"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ user_form.password2.id_for_label }}">Confirmar Contraseña:</label>
+                        {{ user_form.password2 }}
+                    </div>
+                    <button type="submit" class="btn btn-primary d-block mx-auto">Registrar</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de Confirmación -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="confirmModalLabel">Confirmar Registro</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas registrar esta información?
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmSubmit">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Referencias al formulario y campos
+            const form = document.getElementById('registrationForm');
+            const password1 = document.querySelector('#id_password1');
+            const password2 = document.querySelector('#id_password2');
+            const passwordStrength = document.getElementById('passwordStrength');
+
+            // Indicador de fortaleza de contraseña
+            if (password1) {
+                password1.addEventListener('input', () => {
+                    const value = password1.value;
+                    let strength = 'Débil';
+                    let color = 'red';
+
+                    if (value.length >= 8 && /[A-Z]/.test(value) && /[0-9]/.test(value)) {
+                        strength = 'Fuerte';
+                        color = 'green';
+                    } else if (value.length >= 6) {
+                        strength = 'Moderada';
+                        color = 'orange';
+                    }
+
+                    passwordStrength.textContent = `Fortaleza de la contraseña: ${strength}`;
+                    passwordStrength.style.color = color;
+                });
+            }
+
+            // Verificación de contraseñas coincidentes
+            if (password2) {
+                password2.addEventListener('input', () => {
+                    if (password2.value !== password1.value) {
+                        password2.setCustomValidity('Las contraseñas no coinciden');
+                        password2.style.borderColor = 'red';
+                    } else {
+                        password2.setCustomValidity('');
+                        password2.style.borderColor = 'green';
+                    }
+                });
+            }
+
+            // Referencias al modal y sus botones
+            const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            const confirmSubmitButton = document.getElementById('confirmSubmit');
+
+            // Prevenir envío directo del formulario y abrir el modal
+            if (form) {
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault(); // Evita el envío inmediato
+                    if (password1 && password2 && password1.value !== password2.value) {
+                        alert('Las contraseñas no coinciden.');
+                        password2.style.borderColor = 'red';
+                        return;
+                    }
+                    // Muestra el modal de confirmación
+                    confirmModal.show();
+                });
+
+                // Procesar el envío al confirmar
+                confirmSubmitButton.addEventListener('click', () => {
+                    confirmModal.hide();
+                    form.submit(); // Envía el formulario
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

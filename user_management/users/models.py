@@ -26,6 +26,7 @@ class Cliente(models.Model):
     peso = models.CharField(max_length=15, blank=True, null=True)
     edad = models.CharField(max_length=15, blank=True, null=True)
     altura = models.CharField(max_length=15, blank=True, null=True)
+    cedula = models.CharField(max_length=15, blank=True, null=True)
 
     class Meta:
         db_table = 'cliente'
@@ -37,6 +38,12 @@ class Cliente(models.Model):
 class Entrenador(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'rol': 'entrenador'})
     especialidad = models.CharField(max_length=100)
+    direccion = models.TextField(blank=True, null=True)
+    cedula = models.CharField(max_length=15, blank=True, null=True)
+    experiencia_laboral = models.CharField(max_length=15, blank=True, null=True)
+    idioma1 = models.CharField(max_length=15, blank=True, null=True)
+    idioma2 = models.CharField(max_length=15, blank=True, null=True)
+    cargo = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
         db_table = 'entrenador'

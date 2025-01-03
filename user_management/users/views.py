@@ -1,13 +1,17 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password
-from .models import User, Cliente, EvaluacionFisica
-from .forms import RegistrationForm, LoginForm, EvaluationFisicaForm
+from .models import User, Cliente, EvaluacionFisica, Entrenador
+from .forms import RegistrationForm, LoginForm, EvaluationFisicaForm, EntrenadorForm, UserEntrenadorForm
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth import authenticate, login
 
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+from functools import wraps
+from django.http import HttpResponse
+from django.contrib import messages
 
 def home(request):
     return render(request, 'users/home.html')
@@ -116,8 +120,8 @@ def edit_user(request, user_id):
 
     return render(request, 'users/edit_user.html', {'form': form, 'user': user})
 
-# Vista para crear una evaluación física
-class EvaluacionFisicaCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+# Para crear una evaluación física
+class EvaluacionFisicaCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = EvaluacionFisica
     form_class = EvaluationFisicaForm
     template_name = 'users/evaluacionfisica_form.html'
@@ -133,8 +137,8 @@ class EvaluacionFisicaCreateView(LoginRequiredMixin, UserPassesTestMixin, Create
         return self.request.user.rol == 'cliente'
 
 
-# Vista para listar las evaluaciones físicas
-class EvaluacionFisicaListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+# Para listar las evaluaciones físicas
+class EvaluacionFisicaList(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = EvaluacionFisica
     template_name = 'users/evaluacionfisica_list.html'
     context_object_name = 'evaluaciones'
@@ -148,8 +152,8 @@ class EvaluacionFisicaListView(LoginRequiredMixin, UserPassesTestMixin, ListView
         return self.request.user.rol == 'cliente'
 
 
-# Vista para actualizar una evaluación física
-class EvaluacionFisicaUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+# Para actualizar una evaluación física
+class EvaluacionFisicaUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = EvaluacionFisica
     form_class = EvaluationFisicaForm
     template_name = 'users/evaluacionfisica_form.html'
@@ -159,3 +163,88 @@ class EvaluacionFisicaUpdateView(LoginRequiredMixin, UserPassesTestMixin, Update
         # Verifica si el usuario es el propietario de la evaluación
         evaluacion = self.get_object()
         return self.request.user.rol == 'cliente' and evaluacion.user == self.request.user
+     
+def gerente_required(view_func):
+    @wraps(view_func)
+    @login_required  # Asegura que el usuario esté autenticado
+    def _wrapped_view(request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.rol == 'gerente':
+            return view_func(request, *args, **kwargs)
+        # Redirigir a una página de acceso denegado o al inicio
+        return redirect('access_denied')  # Cambia por la vista que desees
+    return _wrapped_view
+
+@gerente_required
+def gerente_cliente(request):
+    # Obtener todos los clientes
+    clientes = Cliente.objects.select_related('user').all()
+    clientes_datos = [
+        {
+            'nombre_completo': f"{cliente.user.first_name.title()} {cliente.user.last_name.title()}",
+            'cedula':cliente.cedula,
+            'telefono': cliente.user.telefono,
+            'direccion': cliente.direccion,
+            'peso': cliente.peso,
+            'edad': cliente.edad,
+            'altura': cliente.altura,
+            'ultimo_inicio_sesion': cliente.user.last_login,
+            'nombre_usuario': cliente.user.username,
+            'correo': cliente.user.email,
+            'esta_activo': cliente.user.is_active,
+            'fecha_incorporacion': cliente.user.date_joined,    
+        }
+        for cliente in clientes
+    ]
+    return render(request, 'users/gerente_cliente.html', {'clientes_datos': clientes_datos})
+
+def access_denied(request):
+    return HttpResponse("<h1>Acceso Denegado</h1><p>No tienes permisos para ver esta página.</p>")
+
+@gerente_required
+def gerente_entrenador(request):
+    # Obtener todos los entrenadores
+    entrenadores = Entrenador.objects.select_related('user').all()
+    entrenadores_datos = [
+        {
+            'nombre_completo': f"{entrenador.user.first_name.title()} {entrenador.user.last_name.title()}",
+            'cedula':entrenador.cedula,
+            'telefono': entrenador.user.telefono,
+            'direccion': entrenador.direccion,
+            'especialidad': entrenador.especialidad,  
+            'experiencia_laboral':entrenador.experiencia_laboral,
+            'cargo':entrenador.cargo, 
+            'ultimo_inicio_sesion': entrenador.user.last_login,
+            'nombre_usuario': entrenador.user.username,
+            'correo': entrenador.user.email,
+            'esta_activo': entrenador.user.is_active,
+            'fecha_incorporacion': entrenador.user.date_joined,  
+            'idioma1':entrenador.idioma1, 
+            'idioma2':entrenador.idioma2,  
+        }
+        for entrenador in entrenadores
+    ]
+    return render(request, 'users/gerente_entrenador.html', {'entrenadores_datos': entrenadores_datos})
+
+def registrar_entrenador(request):
+    if request.method == 'POST':
+        user_form = UserEntrenadorForm(request.POST)
+        entrenador_form = EntrenadorForm(request.POST)
+
+        if user_form.is_valid() and entrenador_form.is_valid():
+            user = user_form.save(commit=True)
+            entrenador = entrenador_form.save(commit=False)
+            entrenador.user = user
+            entrenador.save()
+
+            messages.success(request, 'Entrenador registrado exitosamente.')
+            return redirect('login')  # Cambiar a la vista deseada
+    else:
+        user_form = UserEntrenadorForm(initial={'rol': 'entrenador'})
+        entrenador_form = EntrenadorForm()
+
+    return render(request, 'users/registrar_entrenador.html', {
+        'user_form': user_form,
+        'entrenador_form': entrenador_form
+    })
+
+ 
