@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tu Información</title>
+    <title>Nueva Reserva</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
@@ -29,7 +29,7 @@
                 </div>
                 <ul class="nav flex-column">
                     <li class="nav-item mb-2">
-                        <a class="nav-link text-white active" href="#">
+                        <a class="nav-link text-white active" href="{% url 'cliente_page' %}">
                             <i class="bi bi-house-door-fill me-2"></i>Perfil
                         </a>
                     </li>
@@ -68,55 +68,61 @@
         </nav>
 
         <!-- Main Content -->
-        <div class="flex-grow-1 bg-dark text-white p-4">
-            <h2 class="text-center mb-4">Tu Información</h2>
-            <div class="card mx-auto p-4" style="max-width: 500px; border-radius: 20px; background-color: #212529;">
-                <div class="text-center mb-3">
-                    <!-- Imagen de perfil del cliente -->
-                    <img src="{% static 'images/profile.jpg' %}" alt="Profile Image" class="rounded-circle mb-3"
-                        style="width: 100px;">
-                    <div class="d-flex justify-content-around text-white">
-                        <div>
-                            <h5>{{ cliente.peso }} KG</h5>
-                            <p class="small">Peso</p>
-                        </div>
-                        <div>
-                            <h5>{{ cliente.edad }}</h5>
-                            <p class="small">Años</p>
-                        </div>
-                        <div>
-                            <h5>{{ cliente.altura }} M</h5>
-                            <p class="small">Altura</p>
-                        </div>
-                    </div>
-                </div>
-                <form method="post" action="">
+        <main class="container my-1">
+            <div class="text-center mb-1">
+                <h2>Nueva Reserva</h2>
+            </div>
+            <div class="card mx-auto p-4 form-container"
+                style="height: 690px; max-width: 560px; border-radius: 20px; background-color: #212529;">
+                <form method="POST">
                     {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Nombre Completo</label>
-                        <input type="text" class="form-control" id="name"
-                            value="{{ user.first_name|capfirst }} {{ user.last_name|capfirst }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nickname" class="form-label">Usuario</label>
-                        <input type="text" class="form-control" id="nickname" value="{{ user.first_name }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Correo</label>
-                        <input type="email" class="form-control" id="email" value="{{ user.email }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="telefono" class="form-label">Número de Teléfono</label>
-                        <input type="tel" class="form-control" id="telefono" value="{{ user.telefono }}" readonly>
-                    </div>
-                    <div class="text-center">
-                        <a href="{% url 'edit_user' user.id %}" class="btn btn-primary w-100 mt-3">Actualizar Perfil</a>
+                    <label for="fecha">Fecha:</label>
+                    <input type="date" id="fecha" name="fecha" required>
+
+                    <label for="hora">Hora:</label>
+                    <input type="time" id="hora" name="hora" required>
+
+                    <label for="actividad">Actividad:</label>
+                    <input type="text" name="actividad" required>
+
+                    <label for="duracion">Duración:</label>
+                    <input type="text" name="duracion" required>
+
+                    <label for="precio">Precio:</label>
+                    <input type="number" name="precio" step="0.01" required>
+
+                    <label for="notas">Notas:</label>
+                    <textarea name="notas"></textarea>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary">Reservar</button>
                     </div>
                 </form>
             </div>
-        </div>
+        </main>
     </div>
 
+    <script>
+        // Función para establecer la fecha y hora actuales
+        document.addEventListener("DOMContentLoaded", function () {
+            const fechaInput = document.getElementById("fecha");
+            const horaInput = document.getElementById("hora");
+
+            // Obtener la fecha y hora actuales
+            const ahora = new Date();
+
+            // Formatear la fecha a "YYYY-MM-DD"
+            const year = ahora.getFullYear();
+            const month = String(ahora.getMonth() + 1).padStart(2, '0'); // Mes en formato 2 dígitos
+            const day = String(ahora.getDate()).padStart(2, '0');
+            fechaInput.value = `${year}-${month}-${day}`;
+
+            // Formatear la hora a "HH:MM"
+            const hours = String(ahora.getHours()).padStart(2, '0');
+            const minutes = String(ahora.getMinutes()).padStart(2, '0');
+            horaInput.value = `${hours}:${minutes}`;
+        });
+    </script>
 </body>
 
 </html>

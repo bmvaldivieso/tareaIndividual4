@@ -76,5 +76,25 @@ class EvaluacionFisica(models.Model):
         db_table = 'evaluacionfisica'
 
     def __str__(self):
-        return f"{self.user.username} - {self.record_date}"   
+        return f"{self.user.username} - {self.record_date}"
+
+class Reserva(models.Model):
+    ESTADO_CHOICES = [
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+    ]
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    fecha = models.DateField()
+    hora = models.TimeField()
+    actividad = models.CharField(max_length=100)
+    duracion = models.CharField(max_length=50)
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
+    estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='active')
+    notas = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'reserva'
+
+    def __str__(self):
+        return f"Reserva {self.id} - {self.actividad}"       
 

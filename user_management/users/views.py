@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password
-from .models import User, Cliente, EvaluacionFisica, Entrenador
+from .models import User, Cliente, EvaluacionFisica, Entrenador, Reserva
 from .forms import RegistrationForm, LoginForm, EvaluationFisicaForm, EntrenadorForm, UserEntrenadorForm
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth import authenticate, login
 
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, ListView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
@@ -246,5 +246,40 @@ def registrar_entrenador(request):
         'user_form': user_form,
         'entrenador_form': entrenador_form
     })
+
+@login_required
+def listar_reservas(request):
+    reservas = Reserva.objects.filter(usuario=request.user)
+    return render(request, 'users/listar_reservas.html', {'reservas': reservas})
+
+@login_required
+def nueva_reserva(request):
+    if request.method == 'POST':
+        fecha = request.POST.get('fecha')
+        hora = request.POST.get('hora')
+        actividad = request.POST.get('actividad')
+        duracion = request.POST.get('duracion')
+        precio = request.POST.get('precio')
+        notas = request.POST.get('notas', '')
+
+        reserva = Reserva.objects.create(
+            usuario=request.user,
+            fecha=fecha,
+            hora=hora,
+            actividad=actividad,
+            duracion=duracion,
+            precio=precio,
+            notas=notas
+        )
+
+        # Redirigir a la página de detalles de la reserva recién creada
+        return redirect(reverse('detalle_reserva', args=[reserva.id]))
+
+    return render(request, 'users/nueva_reserva.html')
+
+@login_required
+def detalle_reserva(request, reserva_id):
+    reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
+    return render(request, 'users/detalle_reserva.html', {'reserva': reserva})
 
  

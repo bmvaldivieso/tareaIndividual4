@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tu Información</title>
+    <title>Listar Reservas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
@@ -29,7 +29,7 @@
                 </div>
                 <ul class="nav flex-column">
                     <li class="nav-item mb-2">
-                        <a class="nav-link text-white active" href="#">
+                        <a class="nav-link text-white active" href="{% url 'cliente_page' %}">
                             <i class="bi bi-house-door-fill me-2"></i>Perfil
                         </a>
                     </li>
@@ -49,7 +49,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-2">
-                        <a class="nav-link text-white active" href="{% url 'listar_reservas' %}">
+                        <a class="nav-link text-white active" href="#">
                             <i class="bi bi-calendar-check-fill me-2"></i>Reservas
                         </a>
                     </li>
@@ -69,51 +69,34 @@
 
         <!-- Main Content -->
         <div class="flex-grow-1 bg-dark text-white p-4">
-            <h2 class="text-center mb-4">Tu Información</h2>
-            <div class="card mx-auto p-4" style="max-width: 500px; border-radius: 20px; background-color: #212529;">
-                <div class="text-center mb-3">
-                    <!-- Imagen de perfil del cliente -->
-                    <img src="{% static 'images/profile.jpg' %}" alt="Profile Image" class="rounded-circle mb-3"
-                        style="width: 100px;">
-                    <div class="d-flex justify-content-around text-white">
-                        <div>
-                            <h5>{{ cliente.peso }} KG</h5>
-                            <p class="small">Peso</p>
-                        </div>
-                        <div>
-                            <h5>{{ cliente.edad }}</h5>
-                            <p class="small">Años</p>
-                        </div>
-                        <div>
-                            <h5>{{ cliente.altura }} M</h5>
-                            <p class="small">Altura</p>
-                        </div>
-                    </div>
-                </div>
-                <form method="post" action="">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Nombre Completo</label>
-                        <input type="text" class="form-control" id="name"
-                            value="{{ user.first_name|capfirst }} {{ user.last_name|capfirst }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nickname" class="form-label">Usuario</label>
-                        <input type="text" class="form-control" id="nickname" value="{{ user.first_name }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Correo</label>
-                        <input type="email" class="form-control" id="email" value="{{ user.email }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="telefono" class="form-label">Número de Teléfono</label>
-                        <input type="tel" class="form-control" id="telefono" value="{{ user.telefono }}" readonly>
-                    </div>
-                    <div class="text-center">
-                        <a href="{% url 'edit_user' user.id %}" class="btn btn-primary w-100 mt-3">Actualizar Perfil</a>
-                    </div>
-                </form>
-            </div>
+            <h1>Mis Reservas</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Actividad</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reserva in reservas %}
+                    <tr>
+                        <td>{{ reserva.fecha }}</td>
+                        <td>{{ reserva.hora }}</td>
+                        <td>{{ reserva.actividad }}</td>
+                        <td>{{ reserva.precio }}</td>
+                        <td>{{ reserva.get_estado_display }}</td>
+                        <td>
+                            <a href="{% url 'detalle_reserva' reserva.id %}" class="btn btn-primary">Detalles</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="{% url 'nueva_reserva' %}" class="btn btn-primary">Hacer una nueva reserva</a>
         </div>
     </div>
 
