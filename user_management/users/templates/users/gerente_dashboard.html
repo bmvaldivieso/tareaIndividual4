@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
 </head>
 
@@ -65,103 +66,66 @@
                 <p class="lead">Aquí puedes analizar métricas y gestionar recursos.</p>
             </div>
 
-            <div class="text-center mb-4">
-                <img src="{% static 'images/tablero.jpg' %}" alt="Tablero" width="90%" height="auto" class="img-fluid">
-            </div>
-
             <!-- Métricas y Gestión -->
             <div class="row">
-                <!-- Tarjetas principales -->
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-dark text-white shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Total de Clientes</h5>
-                            <p class="card-text">250 inscritos activos</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-dark text-white shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Ingresos Mensuales</h5>
-                            <p class="card-text">$15,000</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-dark text-white shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Entrenadores Disponibles</h5>
-                            <p class="card-text">10 entrenadores activos</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Nuevas métricas adicionales -->
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-dark text-white shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Ocupación de Salas</h5>
-                            <p class="card-text">80% de ocupación</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-dark text-white shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Objetivos de Entrenamiento Alcanzados</h5>
-                            <p class="card-text">90% de objetivos alcanzados</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-dark text-white shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Nuevos Registros de Clientes</h5>
-                            <p class="card-text">15 nuevos registros este mes</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Métricas adicionales sobre clientes y suscripciones -->
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-dark text-white shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Satisfacción de Clientes</h5>
-                            <p class="card-text">95% de clientes satisfechos</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-dark text-white shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Nuevas Suscripciones</h5>
-                            <p class="card-text">25 nuevas suscripciones este mes</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Métricas sobre entrenamiento y seguimiento -->
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-dark text-white shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Sesiones de Entrenamiento Programadas</h5>
-                            <p class="card-text">120 sesiones este mes</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-dark text-white shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Clientes en Evaluación</h5>
-                            <p class="card-text">30 clientes en evaluación</p>
-                        </div>
-                    </div>
+                <!-- Gráfico de especialidad -->
+                <div style="width: 300px; height: 300px;">
+                    <canvas id="myPieChart"></canvas>
                 </div>
             </div>
         </main>
     </div>
 
+    <script>
+        const ctx = document.getElementById('myPieChart').getContext('2d');
+        const chartData = JSON.parse('{{ data|escapejs }}');
+        const myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    data: chartData.data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        enabled: true
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribución de Especialidades',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        color: '#333'
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

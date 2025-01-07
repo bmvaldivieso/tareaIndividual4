@@ -14,7 +14,6 @@ urlpatterns = [
     path('edit_user/<int:user_id>/', views.edit_user, name='edit_user'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('entrenador/dashboard/', views.entrenador_dashboard, name='entrenador_dashboard'),
-    path('gerente/dashboard/', views.gerente_dashboard, name='gerente_dashboard'),
     path('clientepage/', views.cliente_page, name='cliente_page'),
     path('gestion/', views.gestion, name='gestion'),
     path('evaluaciones/', EvaluacionFisicaList.as_view(), name='evaluaciones_list'),
@@ -27,6 +26,7 @@ urlpatterns = [
     path('listar_reservas/', views.listar_reservas, name='listar_reservas'),
     path('listar_reservas/nueva/', views.nueva_reserva, name='nueva_reserva'),
     path('listar_reservas/<int:reserva_id>/', views.detalle_reserva, name='detalle_reserva'),
+    path('gerente/dashboard/', views.gerente_dashboard, name='gerente_dashboard'),
 ] 
 
 

@@ -13,6 +13,10 @@ from functools import wraps
 from django.http import HttpResponse
 from django.contrib import messages
 
+from django.db.models import Count
+from django.core.serializers.json import DjangoJSONEncoder
+import json
+
 def home(request):
     return render(request, 'users/home.html')
 
@@ -75,9 +79,19 @@ def entrenador_dashboard(request):
 
 @login_required
 def gerente_dashboard(request):
-    if request.user.rol != 'gerente':  # Verifica directamente el rol
+    if request.user.rol != 'gerente':
         return redirect('gestion')
-    return render(request, 'users/gerente_dashboard.html', {'user': request.user})   
+    
+    especialidades = Entrenador.objects.values('especialidad').annotate(total=Count('especialidad'))
+    data = {
+        'labels': [especialidad['especialidad'] for especialidad in especialidades],
+        'data': [especialidad['total'] for especialidad in especialidades]
+    }
+
+    return render(request, 'users/gerente_dashboard.html', {
+        'data': json.dumps(data, cls=DjangoJSONEncoder),
+        'user': request.user
+    })  
 
 def is_cliente(user):
     return user.rol == 'cliente'
@@ -281,5 +295,8 @@ def nueva_reserva(request):
 def detalle_reserva(request, reserva_id):
     reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
     return render(request, 'users/detalle_reserva.html', {'reserva': reserva})
+
+
+
 
  
