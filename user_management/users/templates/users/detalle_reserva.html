@@ -86,16 +86,10 @@
                             <strong>Hora:</strong> {{ reserva.hora }}
                         </li>
                         <li class="list-group-item bg-dark text-white">
-                            <strong>Duración:</strong> {{ reserva.duracion }}
-                        </li>
-                        <li class="list-group-item bg-dark text-white">
-                            <strong>Precio:</strong> ${{ reserva.precio }}
-                        </li>
-                        <li class="list-group-item bg-dark text-white">
                             <strong>Estado:</strong> {{ reserva.get_estado_display }}
                         </li>
                         <li class="list-group-item bg-dark text-white">
-                            <strong>Notas:</strong> {{ reserva.notas }}
+                            <strong>Notas:</strong> {{ reserva.actividad }}
                         </li>
                     </ul>
                 </div>

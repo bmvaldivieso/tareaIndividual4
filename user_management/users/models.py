@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
+from django.utils.timezone import now
 
 class User(AbstractUser):  
     ADMIN = 'administrador'
@@ -80,21 +81,27 @@ class EvaluacionFisica(models.Model):
 
 class Reserva(models.Model):
     ESTADO_CHOICES = [
-        ('active', 'Active'),
-        ('inactive', 'Inactive'),
+        ('Ocupado', 'Ocupado'),
+        ('Desocupado', 'Desocupado')
     ]
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    fecha = models.DateField()
-    hora = models.TimeField()
-    actividad = models.CharField(max_length=100)
-    duracion = models.CharField(max_length=50)
-    precio = models.DecimalField(max_digits=10, decimal_places=2)
-    estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='active')
-    notas = models.TextField(blank=True, null=True)
+    fecha = models.DateField()  # Fecha de la reserva
+    hora = models.TimeField()  # Hora de la reserva
+    actividad = models.CharField(max_length=100)  # Actividad reservada
+    duracion = models.CharField(max_length=50, default="1 hora")  # Duración (1 hora fija)
+    estado = models.CharField(
+        max_length=20, choices=ESTADO_CHOICES, default='Ocupado'
+    )  # Estado de la reserva (ocupado o desocupado)
 
     class Meta:
         db_table = 'reserva'
 
     def __str__(self):
-        return f"Reserva {self.id} - {self.actividad}"       
+        return f"{self.actividad} - {self.fecha} a las {self.hora}"
+
+    def actualizar_estado(self):
+        """Actualizar el estado a 'Desocupado' si la hora ya pasó"""
+        if self.fecha < now().date() or (self.fecha == now().date() and self.hora < now().time()):
+            self.estado = 'Desocupado'
+            self.save()       
 

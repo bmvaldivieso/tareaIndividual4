@@ -60,31 +60,151 @@
         </nav>
 
         <!-- Main Content -->
-        <main class="container my-5">
-            <div class="text-center mb-4">
+        <main class="container my-3">
+            <div class="text-center mb-2">
                 <h2>Bienvenido, {{ user.first_name|capfirst }}</h2>
                 <p class="lead">Aquí puedes analizar métricas y gestionar recursos.</p>
             </div>
 
+
             <!-- Métricas y Gestión -->
             <div class="row">
                 <!-- Gráfico de especialidad -->
-                <div style="width: 300px; height: 300px;">
-                    <canvas id="myPieChart"></canvas>
+                <div class="col-md-6" style="width: 300px; height: 300px;">
+                    <h5 class="text-center">Distribución de Especialidades</h5>
+                    <canvas id="especialidadesChart"></canvas>
+                </div>
+
+                <!-- Gráfico de Usuarios por Rol y Año -->
+                <div class="col-md-6" style="width: 500px; height: 500px;">
+                    <h5 class="text-center">Registro de Usuarios por Año</h5>
+                    <canvas id="usuariosChart"></canvas>
+                </div>
+
+                <!-- Gráfico de provincia -->
+                <div class="col-md-6" style="width: 300px; height: 300px;">
+                    <h5 class="text-center">Distribución por Provincia</h5>
+                    <canvas id="direccionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Gráfico de Inicios de Sesión por Día -->
+                <div class="col-md-6" style="width: 500px; height: 500px;">
+                    <h5 class="text-center">Inicios de Sesión por Día</h5>
+                    <canvas id="loginsChart"></canvas>
+                </div>
+
+                <!-- Gráfico de Reservas por Día -->
+                <div class="col-md-6" style="width: 500px; height: 500px;">
+                    <h5 class="text-center">Reservas por Día</h5>
+                    <canvas id="reservasChart"></canvas>
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- Scripts para gráficos -->
     <script>
-        const ctx = document.getElementById('myPieChart').getContext('2d');
-        const chartData = JSON.parse('{{ data|escapejs }}');
-        const myPieChart = new Chart(ctx, {
+        // Gráfico de especialidades
+        const especialidadesData = JSON.parse('{{ especialidades_data|escapejs }}');
+        const ctxEspecialidades = document.getElementById('especialidadesChart').getContext('2d');
+        new Chart(ctxEspecialidades, {
             type: 'pie',
             data: {
-                labels: chartData.labels,
+                labels: especialidadesData.labels,
                 datasets: [{
-                    data: chartData.data,
+                    data: especialidadesData.data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
+
+        // Gráfico de usuarios por rol y año
+        const usuariosData = JSON.parse('{{ usuarios_data|escapejs }}');
+        const ctxUsuarios = document.getElementById('usuariosChart').getContext('2d');
+
+        const datasets = Object.keys(usuariosData).map(year => ({
+            label: `Año ${year}`,
+            data: usuariosData[year].counts,
+            backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`,
+            borderWidth: 1,
+        }));
+
+        new Chart(ctxUsuarios, {
+            type: 'bar',
+            data: {
+                labels: usuariosData[Object.keys(usuariosData)[0]].roles,
+                datasets: datasets,
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Roles' } },
+                    y: { beginAtZero: true, title: { display: true, text: 'Cantidad de Usuarios' } }
+                }
+            }
+        });
+
+        // Gráfico de inicios de sesión
+        const loginsData = JSON.parse('{{ logins_data|escapejs }}');
+        const ctxLogins = document.getElementById('loginsChart').getContext('2d');
+        new Chart(ctxLogins, {
+            type: 'line',
+            data: {
+                labels: loginsData.labels,
+                datasets: [{
+                    label: 'Inicios de Sesión',
+                    data: loginsData.data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Fecha' } },
+                    y: { title: { display: true, text: 'Cantidad de Inicios' } }
+                }
+            }
+        });
+
+        // Gráfico de Direcciones
+        const direccionData = JSON.parse('{{ data_direccion|escapejs }}'); // Cambiar clave
+        const direccionCtx = document.getElementById('direccionChart').getContext('2d');
+        const direccionChart = new Chart(direccionCtx, {
+            type: 'pie',
+            data: {
+                labels: direccionData.labels, // Direcciones
+                datasets: [{
+                    data: direccionData.data, // Cantidades
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',
@@ -110,17 +230,49 @@
                     legend: {
                         position: 'top',
                     },
-                    tooltip: {
-                        enabled: true
+                }
+            }
+        });
+
+        // Gráfico de Reservas
+        const reservasData = JSON.parse('{{ data_reserva|escapejs }}'); // Cambiar clave
+        const ctx = document.getElementById('reservasChart').getContext('2d');
+        const reservasChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: reservasData.labels, // Fechas
+                datasets: [{
+                    label: 'Reservas',
+                    data: reservasData.data, // Cantidades
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
                     },
                     title: {
                         display: true,
-                        text: 'Distribución de Especialidades',
-                        font: {
-                            size: 18,
-                            weight: 'bold'
-                        },
-                        color: '#333'
+                        text: 'Reservas por Día'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Cantidad de Reservas'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Fecha'
+                        }
                     }
                 }
             }

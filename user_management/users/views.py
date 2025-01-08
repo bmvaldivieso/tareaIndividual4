@@ -17,6 +17,9 @@ from django.db.models import Count
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 
+from django.db import transaction
+from django.db.models.functions import TruncDate
+
 def home(request):
     return render(request, 'users/home.html')
 
@@ -81,17 +84,69 @@ def entrenador_dashboard(request):
 def gerente_dashboard(request):
     if request.user.rol != 'gerente':
         return redirect('gestion')
-    
+
+    # Gráfico existente: Especialidades de los entrenadores
     especialidades = Entrenador.objects.values('especialidad').annotate(total=Count('especialidad'))
-    data = {
+    especialidades_data = {
         'labels': [especialidad['especialidad'] for especialidad in especialidades],
-        'data': [especialidad['total'] for especialidad in especialidades]
+        'data': [especialidad['total'] for especialidad in especialidades],
     }
 
+    # Nuevo gráfico: Usuarios por rol y fecha de registro
+    usuarios = User.objects.values('rol', 'date_joined__year').annotate(total=Count('id'))
+    usuarios_data = {}
+
+    for usuario in usuarios:
+        year = usuario['date_joined__year']
+        if year not in usuarios_data:
+            usuarios_data[year] = {'roles': [], 'counts': []}
+        usuarios_data[year]['roles'].append(usuario['rol'])
+        usuarios_data[year]['counts'].append(usuario['total'])
+
+    # Gráfico de inicios de sesión (last_login)
+    last_logins = User.objects.annotate(day=TruncDate('last_login')).values('day').annotate(total=Count('id')).order_by('day')
+    logins_data = {
+        'labels': [str(login['day']) for login in last_logins],
+        'data': [login['total'] for login in last_logins]
+    }
+
+    # Agrupar clientes y entrenadores por dirección
+    cliente_direcciones = Cliente.objects.values('direccion').annotate(total=Count('direccion'))
+    entrenador_direcciones = Entrenador.objects.values('direccion').annotate(total=Count('direccion'))
+
+    direcciones = {}
+    for item in cliente_direcciones:
+        if item['direccion']:
+            direcciones[item['direccion']] = direcciones.get(item['direccion'], 0) + item['total']
+    for item in entrenador_direcciones:
+        if item['direccion']:
+            direcciones[item['direccion']] = direcciones.get(item['direccion'], 0) + item['total']
+
+    data_direccion = {
+        'labels': list(direcciones.keys()),
+        'data': list(direcciones.values()),
+    }
+
+    # Agrupar reservas por fecha y contar
+    reservas_por_dia = (
+        Reserva.objects.values('fecha')
+        .annotate(total=Count('id'))
+        .order_by('fecha')
+    )
+
+    data_reserva = {
+        'labels': [reserva['fecha'].strftime('%Y-%m-%d') for reserva in reservas_por_dia],
+        'data': [reserva['total'] for reserva in reservas_por_dia],
+    }   
+
     return render(request, 'users/gerente_dashboard.html', {
-        'data': json.dumps(data, cls=DjangoJSONEncoder),
-        'user': request.user
-    })  
+        'especialidades_data': json.dumps(especialidades_data, cls=DjangoJSONEncoder),
+        'usuarios_data': json.dumps(usuarios_data, cls=DjangoJSONEncoder),
+        'logins_data': json.dumps(logins_data, cls=DjangoJSONEncoder),
+        'data_direccion': json.dumps(data_direccion, cls=DjangoJSONEncoder), 
+        'data_reserva': json.dumps(data_reserva, cls=DjangoJSONEncoder),
+        'user': request.user,
+    })
 
 def is_cliente(user):
     return user.rol == 'cliente'
@@ -268,26 +323,38 @@ def listar_reservas(request):
 
 @login_required
 def nueva_reserva(request):
-    if request.method == 'POST':
-        fecha = request.POST.get('fecha')
-        hora = request.POST.get('hora')
-        actividad = request.POST.get('actividad')
-        duracion = request.POST.get('duracion')
-        precio = request.POST.get('precio')
-        notas = request.POST.get('notas', '')
+    if request.method == "POST":
+        fecha = request.POST.get("fecha")
+        hora = request.POST.get("hora")
+        actividad = request.POST.get("actividad")
 
-        reserva = Reserva.objects.create(
-            usuario=request.user,
-            fecha=fecha,
-            hora=hora,
-            actividad=actividad,
-            duracion=duracion,
-            precio=precio,
-            notas=notas
-        )
+        # Validar que los campos no estén vacíos
+        if not fecha or not hora or not actividad:
+            error = "Todos los campos son obligatorios."
+            return render(request, "users/nueva_reserva.html", {"error": error})
 
-        # Redirigir a la página de detalles de la reserva recién creada
-        return redirect(reverse('detalle_reserva', args=[reserva.id]))
+        try:
+            with transaction.atomic():
+                # Verificar si ya existe una reserva en esa fecha y hora
+                if Reserva.objects.select_for_update().filter(fecha=fecha, hora=hora, estado="Ocupado").exists():
+                    error = "Esta hora ya está ocupada. Por favor, selecciona otra hora."
+                    return render(request, "users/nueva_reserva.html", {"error": error})
+                else:
+                    # Crear la reserva
+                    reserva = Reserva.objects.create(
+                        usuario=request.user,
+                        fecha=fecha,
+                        hora=hora,
+                        actividad=actividad,
+                    )
+                    return redirect(reverse('detalle_reserva', args=[reserva.id]))
+        except Exception as e:
+            error = f"Ocurrió un error: {str(e)}"
+            return render(request, "users/nueva_reserva.html", {"error": error})
+
+    # Actualizar el estado de todas las reservas vencidas
+    for reserva in Reserva.objects.filter(estado="Ocupado"):
+        reserva.actualizar_estado()
 
     return render(request, 'users/nueva_reserva.html')
 

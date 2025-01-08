@@ -76,7 +76,6 @@
                         <th>Fecha</th>
                         <th>Hora</th>
                         <th>Actividad</th>
-                        <th>Precio</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
@@ -87,7 +86,6 @@
                         <td>{{ reserva.fecha }}</td>
                         <td>{{ reserva.hora }}</td>
                         <td>{{ reserva.actividad }}</td>
-                        <td>{{ reserva.precio }}</td>
                         <td>{{ reserva.get_estado_display }}</td>
                         <td>
                             <a href="{% url 'detalle_reserva' reserva.id %}" class="btn btn-primary">Detalles</a>
