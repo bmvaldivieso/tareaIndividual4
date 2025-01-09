@@ -1,6 +1,12 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User, Cliente, EvaluacionFisica, Entrenador
+from django.contrib.auth.forms import PasswordResetForm
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMessage
 
 class RegistrationForm(UserCreationForm):
     direccion = forms.CharField(max_length=255, required=False, label='Dirección')
@@ -19,7 +25,7 @@ class RegistrationForm(UserCreationForm):
 
     password1 = forms.CharField(
         label='Contraseña',
-        widget=forms.PasswordInput(attrs={'aria-label': 'Contraseña', 'placeholder': 'Contraseña'}),
+        widget=forms.PasswordInput(attrs={'aria-label': 'Contraseña', 'placeholder': 'En la contraseña no debe incluir el usuario'}),
         error_messages={
             'required': 'Este campo es obligatorio.',
             'min_length': 'La contraseña debe contener al menos 8 caracteres.',
@@ -31,7 +37,7 @@ class RegistrationForm(UserCreationForm):
 
     password2 = forms.CharField(
         label='Confirmar contraseña',
-        widget=forms.PasswordInput(attrs={'aria-label': 'Confirmar contraseña', 'placeholder': 'Confirmar contraseña'}),
+        widget=forms.PasswordInput(attrs={'aria-label': 'Confirmar contraseña', 'placeholder': 'En la contraseña no debe incluir el usuario'}),
         error_messages={'required': 'Este campo es obligatorio.'}
     )
 
@@ -182,7 +188,48 @@ class UserEntrenadorForm(forms.ModelForm):
         user.set_password(self.cleaned_data['password1'])  # Establecer la contraseña
         if commit:
             user.save()
-        return user      
+        return user
+
+class CustomPasswordResetForm(PasswordResetForm):
+    def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None):
+        # Asunto
+        subject = "Recupera tu contraseña en GymApp"
+
+        # Cuerpo del mensaje
+        email_body = render_to_string('emails/password_reset_email.html', context)
+
+        # Enviar el correo
+        email = EmailMessage(subject, email_body, from_email, [to_email])
+        email.content_subtype = "html"  # Indica que el correo es HTML
+        email.send()
+
+    def save(self, domain_override=None,
+             subject_template_name=None,
+             email_template_name=None,
+             use_https=False,
+             token_generator=default_token_generator,
+             from_email=None,
+             request=None,
+             html_email_template_name=None,
+             extra_email_context=None):
+
+        for user in self.get_users(self.cleaned_data['email']):
+            context = {
+                'email': user.email,
+                'domain': domain_override or request.get_host(),
+                'site_name': 'Mi Sitio Web',
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'user': user,
+                'token': token_generator.make_token(user),
+                'protocol': 'https' if use_https else 'http',
+            }
+            if extra_email_context is not None:
+                context.update(extra_email_context)
+            self.send_mail(subject_template_name, email_template_name, context, from_email, user.email, html_email_template_name)
+
+class OTPForm(forms.Form):
+    otp = forms.CharField(label="Código de Verificación", max_length=6, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
 
 
           

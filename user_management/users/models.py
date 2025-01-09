@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
 from django.utils.timezone import now
+from datetime import timedelta
+from django.utils import timezone
 
 class User(AbstractUser):  
     ADMIN = 'administrador'
@@ -103,5 +105,20 @@ class Reserva(models.Model):
         """Actualizar el estado a 'Desocupado' si la hora ya pasó"""
         if self.fecha < now().date() or (self.fecha == now().date() and self.hora < now().time()):
             self.estado = 'Desocupado'
-            self.save()       
+            self.save()
+
+class OTPCode(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField()
+
+    def is_valid(self):
+        current_time = timezone.now()
+        print(f"Hora de creación (local): {timezone.localtime(self.created_at)}")
+        print(f"Hora actual (local): {timezone.localtime(current_time)}")
+        return current_time < self.created_at + timedelta(minutes=5)
+
+
+
+
 

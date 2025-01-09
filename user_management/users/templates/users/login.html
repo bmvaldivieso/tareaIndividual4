@@ -43,6 +43,10 @@
                     {% csrf_token %}
                     {{ form.as_p }}
                     <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+
+                    <div class="text-center mt-3"> <a href="{% url 'password_reset' %}">Recuperar contraseña</a>
+                    </div>
+
                     <!-- Texto de registro debajo del botón de iniciar sesión -->
                     <div class="text-center mt-3">
                         <p class="text-white">¿No tienes una cuenta? <a href="{% url 'register' %}"

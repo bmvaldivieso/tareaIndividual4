@@ -6,6 +6,7 @@ from .views import (
     EvaluacionFisicaList,
     EvaluacionFisicaUpdate,
 )
+from .forms import CustomPasswordResetForm
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -27,7 +28,16 @@ urlpatterns = [
     path('listar_reservas/nueva/', views.nueva_reserva, name='nueva_reserva'),
     path('listar_reservas/<int:reserva_id>/', views.detalle_reserva, name='detalle_reserva'),
     path('gerente/dashboard/', views.gerente_dashboard, name='gerente_dashboard'),
+     # Rutas recuperar contraseña
+    path('password_reset/', auth_views.PasswordResetView.as_view(form_class=CustomPasswordResetForm), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    # Ruta 2FA
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
+
 ] 
+
 
 
 

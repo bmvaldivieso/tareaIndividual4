@@ -20,6 +20,13 @@ import json
 from django.db import transaction
 from django.db.models.functions import TruncDate
 
+import random
+from django.core.mail import send_mail
+from .forms import LoginForm, OTPForm
+from .models import OTPCode
+
+from django.utils import timezone
+
 def home(request):
     return render(request, 'users/home.html')
 
@@ -44,15 +51,55 @@ def login_view(request):
             password = form.cleaned_data['password']
             user = authenticate(username=username, password=password)
             if user is not None:
-                login(request, user)
-                next_url = request.GET.get('next', 'gestion')  
-                return redirect(next_url)
+                # Generar y guardar el código OTP
+                otp_code = random.randint(100000, 999999)
+                OTPCode.objects.update_or_create(user=user, defaults={'code': str(otp_code), 'created_at': timezone.now()})
+                
+                # Enviar el correo
+                send_mail(
+                    'Código de verificación',
+                    f'Tu código es: {otp_code}',
+                    'noreply@example.com',
+                    [user.email],
+                    fail_silently=False,
+                )
+                
+                # Redirigir a la página de verificación
+                request.session['user_id'] = user.id  # Guardar usuario en la sesión
+                return redirect('verify_otp')
             else:
                 form.add_error(None, "Credenciales incorrectas.")
     else:
         form = LoginForm()
-    
     return render(request, 'users/login.html', {'form': form})
+
+def verify_otp(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('login')
+
+    user = User.objects.get(id=user_id)
+
+    if request.method == 'POST':
+        form = OTPForm(request.POST)
+        if form.is_valid():
+            otp_code = form.cleaned_data['otp']
+            try:
+                otp_entry = OTPCode.objects.get(user=user)
+
+                # Verificar si el código es válido y si el OTP ha expirado
+                if otp_entry.code == otp_code and otp_entry.is_valid():
+                    login(request, user)
+                    otp_entry.delete()  # Eliminar el OTP usado
+                    return redirect('gestion')  # Redirigir al dashboard
+                else:
+                    messages.error(request, "El código es incorrecto o ha expirado.")
+            except OTPCode.DoesNotExist:
+                messages.error(request, "Código no encontrado. Por favor, intente nuevamente.")
+    else:
+        form = OTPForm()
+
+    return render(request, 'users/verify_otp.html', {'form': form})
 
 @login_required
 def gestion(request):
