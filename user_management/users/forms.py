@@ -56,12 +56,13 @@ class RegistrationForm(UserCreationForm):
         }
 
     def save(self, commit=True):
-        # Guarda el usuario principal
         user = super().save(commit=False)
-        user.rol = 'cliente'  # Asigna el rol por defecto
+        user.rol = 'cliente'  # Rol por defecto
+        user.email_verified = False  # Inicialmente no verificado
         if commit:
             user.save()
-            # Crea una instancia de Cliente asociada al usuario
+            user.generate_verification_token()  # Genera el token después de guardar
+            # Crea la instancia de Cliente asociada
             Cliente.objects.create(
                 user=user,
                 direccion=self.cleaned_data.get('direccion', ''),

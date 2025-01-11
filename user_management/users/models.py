@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator
 from django.utils.timezone import now
 from datetime import timedelta
 from django.utils import timezone
+from django.utils.crypto import get_random_string
 
 class User(AbstractUser):  
     ADMIN = 'administrador'
@@ -16,9 +17,16 @@ class User(AbstractUser):
 
     telefono = models.CharField(max_length=15, blank=True, null=True)
     rol = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    email_verified = models.BooleanField(default=False)  
+    verification_token = models.CharField(max_length=64, blank=True, null=True)  
     
     class Meta:
         db_table = 'usuario'
+
+    def generate_verification_token(self):
+        """Generar un token único para la verificación."""
+        self.verification_token = get_random_string(length=64)
+        self.save()
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.rol}"

@@ -35,7 +35,8 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     # Ruta 2FA
     path('verify-otp/', views.verify_otp, name='verify_otp'),
-
+    # Verificar correo 
+    path('verify-email/<str:token>/', views.verify_email, name='verify_email'),
 ] 
 
 

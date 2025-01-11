@@ -188,7 +188,7 @@
         altura.addEventListener('input', () => {
             // Permite números y un solo punto decimal
             if ((altura.value.match(/\./g) || []).length > 1) {
-                altura.value = altura.value.replace(/\.$/, ''); 
+                altura.value = altura.value.replace(/\.$/, '');
             }
             altura.value = altura.value.replace(/[^0-9.]/g, '');
         });

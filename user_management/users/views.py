@@ -27,21 +27,52 @@ from .models import OTPCode
 
 from django.utils import timezone
 
+from django.conf import settings
+
 def home(request):
     return render(request, 'users/home.html')
 
 def register(request):
-    if request.method == 'POST':
+    if request.method == "POST":
+        # Tu lógica para registrar al usuario
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            try:
-                form.save()
-                return redirect('login')
-            except Exception as e:
-                form.add_error(None, f"Ocurrió un error al registrar: {str(e)}")    
+            user = form.save()
+            send_verification_email(user)
+            # Agrega un mensaje de éxito antes de redirigir
+            messages.success(request, "Registro exitoso. Revisa tu correo para verificar tu cuenta.")
+            return redirect("login")  # Asegúrate de que "login" sea el nombre de la URL del login
+        else:
+            messages.error(request, "Hubo un error en el registro. Verifica los campos.")
     else:
         form = RegistrationForm()
-    return render(request, 'users/register.html', {'form': form})
+
+    return render(request, "users/register.html", {"form": form})
+
+
+def send_verification_email(user):
+    # Verifica que 'verification_token' existe en el modelo
+    if not hasattr(user, 'verification_token'):
+        raise AttributeError("El usuario no tiene el atributo 'verification_token'.")
+
+    verification_url = settings.SITE_URL + reverse('verify_email', args=[user.verification_token])
+    subject = "Verifica tu correo"
+    message = f"Hola {user.first_name},\n\nPor favor verifica tu cuenta haciendo clic en el siguiente enlace:\n\n{verification_url}\n\nGracias."
+    from_email = settings.EMAIL_HOST_USER
+    recipient_list = [user.email]
+
+    send_mail(subject, message, from_email, recipient_list)
+
+def verify_email(request, token):
+    try:
+        user = User.objects.get(verification_token=token)
+        user.is_active = True  # Activa el usuario
+        user.save()
+        messages.success(request, "Tu correo ha sido verificado. Ahora puedes iniciar sesión.")
+        return redirect('login')
+    except User.DoesNotExist:
+        messages.error(request, "Token de verificación inválido.")
+        return redirect('register')    
 
 def login_view(request):
     if request.method == 'POST':

@@ -142,6 +142,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'bmvaldivieso@gmail.com'
 EMAIL_HOST_PASSWORD = 'exez wehh fgxu snob'
 DEFAULT_FROM_EMAIL = 'GymApp <bmvaldivieso@gmail.com>'
+SITE_URL = 'http://127.0.0.1:8000/'
 
 
 
