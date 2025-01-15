@@ -43,11 +43,6 @@
                     </li>
                     <li class="nav-item mb-2">
                         <a class="nav-link text-white active" href="#">
-                            <i class="bi bi-calendar2-check me-2"></i>Asistencia
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white active" href="#">
                             <i class="bi bi-calendar-check-fill me-2"></i>Clases
                         </a>
                     </li>
@@ -80,6 +75,25 @@
                     <canvas id="clasesChart"></canvas>
                 </div>
 
+                <!-- Gráfico de Reservas-->
+                <div class="col-md-6" style="width: 300px; height: 300px;">
+                    <h5 class="text-center">Reservas</h5>
+                    <canvas id="reservasChart"></canvas>
+                </div>
+
+                <!-- Gráfico de Actividades-->
+                <div class="col-md-6" style="width: 500px; height: 500px;">
+                    <h5 class="text-center">Actividades</h5>
+                    <canvas id="actividadesChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Gráfico de Evaluaciones Ficicas -->
+                <div class="col-md-6" style="width: 500px; height: 500px;">
+                    <h5 class="text-center">Evaluaciones Fisicas</h5>
+                    <canvas id="evaluacionesChart"></canvas>
+                </div>
             </div>
 
         </main>
@@ -125,6 +139,108 @@
                         title: {
                             display: true,
                             text: 'Clases'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Estado de las Reservas
+        const dataReservas = JSON.parse('{{ data_reservas|escapejs }}');
+        console.log(dataReservas);
+        const ctx2 = document.getElementById('reservasChart').getContext('2d');
+        const reservasChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: dataReservas.labels,
+                datasets: dataReservas.datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true
+                    },
+                    title: {
+                        display: true,
+                        text: 'Estado de las Reservas'
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Frecuencia de Actividades
+        const dataActividades = JSON.parse('{{ data_actividades|escapejs }}');
+        console.log(dataActividades);
+        const ctx3 = document.getElementById('actividadesChart').getContext('2d');
+        const actividadesChart = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: dataActividades.labels,
+                datasets: dataActividades.datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Frecuencia de Actividades Reservadas'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Número de Reservas'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Actividades'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Evaluaciones Físicas
+        const dataEvaluaciones = JSON.parse('{{ data_evaluaciones|escapejs }}');
+        console.log(dataEvaluaciones);
+        const ctx4 = document.getElementById('evaluacionesChart').getContext('2d');
+        const evaluacionesChart = new Chart(ctx4, {
+            type: 'line',
+            data: {
+                labels: dataEvaluaciones.labels,
+                datasets: dataEvaluaciones.datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true
+                    },
+                    title: {
+                        display: true,
+                        text: 'Tendencia de Evaluaciones Físicas'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Valor Medio'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Fecha de Evaluación'
                         }
                     }
                 }

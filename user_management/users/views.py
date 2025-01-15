@@ -29,6 +29,9 @@ from django.utils import timezone
 
 from django.conf import settings
 
+from collections import Counter
+from django.db.models import Avg
+
 def home(request):
     return render(request, 'users/home.html')
 
@@ -161,7 +164,6 @@ def entrenador_dashboard(request):
     entrenador = request.user.entrenador 
     clases = Clase.objects.filter(entrenador=entrenador)
     asignaciones = Asignacion.objects.filter(clase__entrenador=entrenador)
-
     data_clases = {
         "labels": [clase.nombre for clase in clases],
         "datasets": [{
@@ -172,13 +174,76 @@ def entrenador_dashboard(request):
             "borderWidth": 1,
         }]
     }
-
-    # Convertir el diccionario en una cadena JSON
     data_clases_json = json.dumps(data_clases)
+
+    # Dona de reservas grafico
+    reservas = Reserva.objects.all()
+    estado_reservas = Counter(reserva.estado for reserva in reservas)
+    data_reservas = {
+        'labels': list(estado_reservas.keys()),
+        'datasets': [{
+            'data': list(estado_reservas.values()),
+            'backgroundColor': [
+                'rgba(75, 192, 192, 0.5)',
+                'rgba(255, 99, 132, 0.5)'
+            ],
+            'borderColor': [
+                'rgba(75, 192, 192, 1)',
+                'rgba(255, 99, 132, 1)'
+            ],
+            'borderWidth': 1
+        }]
+    }
+    data_reservas = json.dumps(data_reservas)
+
+    # Grafico de reservas por actividad
+    reservas = Reserva.objects.all()
+    actividades_reservas = Counter(reserva.actividad for reserva in reservas)
+    data_actividades = {
+        'labels': list(actividades_reservas.keys()),
+        'datasets': [{
+            'label': 'Número de Reservas',
+            'data': list(actividades_reservas.values()),
+            'backgroundColor': 'rgba(75, 192, 192, 0.5)',
+            'borderColor': 'rgba(75, 192, 192, 1)',
+            'borderWidth': 1
+        }]
+    }
+    data_actividades = json.dumps(data_actividades)
+
+    # Grafico de evaluaciones fisicas
+    evaluaciones = EvaluacionFisica.objects.values('fecha_registro').annotate(
+        avg_peso=Avg('peso'),
+        avg_porcentaje_grasa=Avg('porcentaje_grasa'),
+        avg_resistencia_fisica=Avg('resistencia_fisica')
+    ).order_by('fecha_registro')
+    data_evaluaciones = {
+        'labels': [e['fecha_registro'].strftime('%Y-%m-%d') for e in evaluaciones],
+        'datasets': [
+            {
+                'label': 'Peso Promedio',
+                'data': [e['avg_peso'] for e in evaluaciones],
+                'borderColor': 'rgba(75, 192, 192, 1)',
+                'backgroundColor': 'rgba(75, 192, 192, 0.2)',
+                'fill': False
+            },
+            {
+                'label': 'Porcentaje de Grasa Promedio',
+                'data': [e['avg_porcentaje_grasa'] for e in evaluaciones],
+                'borderColor': 'rgba(255, 99, 132, 1)',
+                'backgroundColor': 'rgba(255, 99, 132, 0.2)',
+                'fill': False
+            }
+        ]
+    }
+    data_evaluaciones = json.dumps(data_evaluaciones)
         
     return render(request, 'users/entrenador_dashboard.html', {
         'user': request.user,
         'data_clases': data_clases_json,
+        'data_reservas': data_reservas,
+        'data_actividades': data_actividades,
+        'data_evaluaciones': data_evaluaciones,
     })
 
 @login_required
