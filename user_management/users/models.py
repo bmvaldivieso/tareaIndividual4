@@ -125,6 +125,32 @@ class OTPCode(models.Model):
         print(f"Hora de creación (local): {timezone.localtime(self.created_at)}")
         print(f"Hora actual (local): {timezone.localtime(current_time)}")
         return current_time < self.created_at + timedelta(minutes=5)
+    
+class Clase(models.Model):
+    entrenador = models.ForeignKey(Entrenador, on_delete=models.CASCADE)
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField(blank=True, null=True)
+    fecha = models.DateField()
+    hora_inicio = models.TimeField()
+    duracion = models.DurationField()
+    capacidad = models.IntegerField()
+
+    class Meta:
+        db_table = 'clase'
+
+    def __str__(self):
+        return f"Clase: {self.nombre} - Entrenador: {self.entrenador.user.username}"
+
+class Asignacion(models.Model):
+    clase = models.ForeignKey(Clase, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    fecha_asignacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'asignacion'
+
+    def __str__(self):
+        return f"Asignacion: {self.cliente.user.username} a la clase {self.clase.nombre}"    
 
 
 

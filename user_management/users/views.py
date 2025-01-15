@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password
-from .models import User, Cliente, EvaluacionFisica, Entrenador, Reserva
+from .models import User, Cliente, EvaluacionFisica, Entrenador, Reserva, Clase, Asignacion
 from .forms import RegistrationForm, LoginForm, EvaluationFisicaForm, EntrenadorForm, UserEntrenadorForm
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth import authenticate, login
@@ -156,7 +156,30 @@ def cliente_page(request):
 def entrenador_dashboard(request):
     if request.user.rol != 'entrenador':  # Verifica directamente el rol
         return redirect('gestion')
-    return render(request, 'users/entrenador_dashboard.html', {'user': request.user})
+
+    # Obtener datos para el gráfico de clases del entrenador que ha iniciado sesión
+    entrenador = request.user.entrenador 
+    clases = Clase.objects.filter(entrenador=entrenador)
+    asignaciones = Asignacion.objects.filter(clase__entrenador=entrenador)
+
+    data_clases = {
+        "labels": [clase.nombre for clase in clases],
+        "datasets": [{
+            "label": "Número de Clientes",
+            "data": [asignaciones.filter(clase=clase).count() for clase in clases],
+            "backgroundColor": "rgba(75, 192, 192, 0.2)",
+            "borderColor": "rgba(75, 192, 192, 1)",
+            "borderWidth": 1,
+        }]
+    }
+
+    # Convertir el diccionario en una cadena JSON
+    data_clases_json = json.dumps(data_clases)
+        
+    return render(request, 'users/entrenador_dashboard.html', {
+        'user': request.user,
+        'data_clases': data_clases_json,
+    })
 
 @login_required
 def gerente_dashboard(request):
@@ -401,40 +424,32 @@ def listar_reservas(request):
 
 @login_required
 def nueva_reserva(request):
+    error = None  # Variable para manejar mensajes de error
+
     if request.method == "POST":
         fecha = request.POST.get("fecha")
         hora = request.POST.get("hora")
         actividad = request.POST.get("actividad")
 
-        # Validar que los campos no estén vacíos
-        if not fecha or not hora or not actividad:
-            error = "Todos los campos son obligatorios."
-            return render(request, "users/nueva_reserva.html", {"error": error})
-
-        try:
-            with transaction.atomic():
-                # Verificar si ya existe una reserva en esa fecha y hora
-                if Reserva.objects.select_for_update().filter(fecha=fecha, hora=hora, estado="Ocupado").exists():
-                    error = "Esta hora ya está ocupada. Por favor, selecciona otra hora."
-                    return render(request, "users/nueva_reserva.html", {"error": error})
-                else:
-                    # Crear la reserva
-                    reserva = Reserva.objects.create(
-                        usuario=request.user,
-                        fecha=fecha,
-                        hora=hora,
-                        actividad=actividad,
-                    )
-                    return redirect(reverse('detalle_reserva', args=[reserva.id]))
-        except Exception as e:
-            error = f"Ocurrió un error: {str(e)}"
-            return render(request, "users/nueva_reserva.html", {"error": error})
+        # Verificar si ya existe una reserva para la misma fecha y hora
+        if Reserva.objects.filter(fecha=fecha, hora=hora, estado="Ocupado").exists():
+            error = "Esta hora ya está ocupada. Por favor, selecciona otra hora o fecha."
+        else:
+            # Crear la reserva si la fecha y hora están disponibles
+            reserva = Reserva(
+                usuario=request.user,
+                fecha=fecha,
+                hora=hora,
+                actividad=actividad,
+            )
+            reserva.save()
+            return redirect(reverse('detalle_reserva', args=[reserva.id]))  # Redirigir tras la reserva exitosa
 
     # Actualizar el estado de todas las reservas vencidas
     for reserva in Reserva.objects.filter(estado="Ocupado"):
         reserva.actualizar_estado()
 
-    return render(request, 'users/nueva_reserva.html')
+    return render(request, "users/nueva_reserva.html", {"error": error})
 
 @login_required
 def detalle_reserva(request, reserva_id):

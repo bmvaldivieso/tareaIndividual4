@@ -9,17 +9,17 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 
 class RegistrationForm(UserCreationForm):
-    direccion = forms.CharField(max_length=255, required=False, label='Dirección')
-    peso = forms.CharField(max_length=15, required=False, label='Peso')
-    altura = forms.CharField(max_length=15, required=False, label='Altura')
-    edad = forms.CharField(max_length=15, required=False, label='Edad')
-    cedula = forms.CharField(max_length=15, required=False, label='Cedula')
+    direccion = forms.CharField(max_length=255, required=False, label='Dirección', widget=forms.Textarea(attrs={'rows': 3,'placeholder': 'Ciudad donde reside'}))
+    peso = forms.CharField(max_length=15, required=False, label='Peso', widget=forms.TextInput(attrs={'placeholder': 'Ingrese su peso (en kilogramos)'}))
+    altura = forms.CharField(max_length=15, required=False, label='Altura', widget=forms.TextInput(attrs={'placeholder': 'Ingrese su talla (en metros)'}))
+    edad = forms.CharField(max_length=15, required=False, label='Edad', widget=forms.TextInput(attrs={'placeholder': 'Ingrese su edad'}))
+    cedula = forms.CharField(max_length=15, required=False, label='Cedula', widget=forms.TextInput(attrs={'placeholder': 'Ingrese su numero de cédula'}))
 
     username = forms.CharField(
         max_length=150, 
         required=True, 
         label='Nombre de usuario', 
-        widget=forms.TextInput(attrs={'aria-label': 'Nombre de usuario'}),
+        widget=forms.TextInput(attrs={'aria-label': 'Nombre de usuario', 'placeholder': 'Evite caracteres especiales (Max. 8 digitos)'}),
         error_messages={'required': '', 'max_length': ''} 
     )
 
@@ -54,6 +54,12 @@ class RegistrationForm(UserCreationForm):
             'password2': 'Confirmar contraseña',
             'cedula': 'Cédula',
         }
+        widgets = {
+            'first_name': forms.TextInput(attrs={'placeholder': 'Ingrese su Nombre'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Ingrese su Apellido'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Ingrese su Correo electrónico'}),
+            'telefono': forms.TextInput(attrs={'placeholder': 'Ingrese su numero Teléfono'}),
+        }
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -74,14 +80,89 @@ class RegistrationForm(UserCreationForm):
         return user
 
     def clean_username(self):
-        # Si es una edición, no validamos la unicidad del username
         username = self.cleaned_data.get('username')
+        
+        # Si es una edición, no validamos la unicidad del username
         if self.instance and self.instance.username == username:
+            if not username.isalnum() or len(username) > 8:
+                raise forms.ValidationError("El nombre de usuario no puede contener símbolos especiales y debe tener máximo 8 caracteres.")
             return username
+        
+        # Validar unicidad del nombre de usuario
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError("Este nombre de usuario ya existe.")
+        
+        # Validar formato del nombre de usuario
+        if not username.isalnum() or len(username) > 8:
+            raise forms.ValidationError("El nombre de usuario no puede contener símbolos especiales y debe tener máximo 8 caracteres.")
+        
         return username
+    
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if not first_name.isalpha():
+            raise forms.ValidationError("El nombre solo puede contener letras.")
+        return first_name.capitalize()
+    
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        if not last_name.isalpha():
+            raise forms.ValidationError("El apellido solo puede contener letras.")
+        return last_name.capitalize()
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not email or '@' not in email or '.' not in email.split('@')[-1]:
+            raise forms.ValidationError("Introduce un correo electrónico válido.")
+        # Opcional: restringir dominios permitidos
+        allowed_domains = ['gmail.com', 'outlook.com', 'yahoo.com']
+        domain = email.split('@')[-1]
+        if domain not in allowed_domains:
+            raise forms.ValidationError(f"El dominio del correo no está permitido. Usa uno de estos: {', '.join(allowed_domains)}.")
+        return email
+    
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+        if not telefono.isdigit() or len(telefono) != 10:
+            raise forms.ValidationError("El teléfono debe contener exactamente 10 dígitos y no incluir caracteres especiales.")
+        return telefono
 
+    def clean_direccion(self):
+        direccion = self.cleaned_data.get('direccion')
+        if not direccion.replace(' ', '').isalpha():
+            raise forms.ValidationError("La dirección solo puede contener letras y espacios.")
+        if len(direccion) > 30:
+            raise forms.ValidationError("La dirección no puede exceder los 30 caracteres.")
+        return direccion
+
+    def clean_peso(self):
+        peso = self.cleaned_data.get('peso')
+        if not peso.isdigit() or int(peso) > 50:
+            raise forms.ValidationError("El peso debe ser un número positivo menor o igual a 50 kg.")
+        return peso
+
+    def clean_altura(self):
+        altura = self.cleaned_data.get('altura')
+        try:
+            altura = float(altura)
+            if altura <= 0 or altura > 3:
+                raise forms.ValidationError("La altura debe ser positiva y menor o igual a 3 metros.")
+        except ValueError:
+            raise forms.ValidationError("La altura debe ser un número válido.")
+        return altura
+
+    def clean_edad(self):
+        edad = self.cleaned_data.get('edad')
+        if not edad.isdigit() or int(edad) < 0 or int(edad) > 100:
+            raise forms.ValidationError("La edad debe ser un número positivo menor o igual a 100.")
+        return edad
+
+    def clean_cedula(self):
+        cedula = self.cleaned_data.get('cedula')
+        if not cedula.isdigit() or len(cedula) != 10:
+            raise forms.ValidationError("La cédula debe contener exactamente 10 dígitos.")
+        # Aquí lógica para validar cédulas ecuatorianas
+        return cedula
 
 class LoginForm(forms.Form):
     username = forms.CharField(label="Usuario")
@@ -132,19 +213,68 @@ class EntrenadorForm(forms.ModelForm):
         widgets = {
             'direccion': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Ciudad donde reside'}),
             'especialidad': forms.TextInput(attrs={'placeholder': 'Musculación, cardio, yoga'}),
-            'cedula': forms.TextInput(attrs={'placeholder': 'Numero de cédula'}),
+            'cedula': forms.TextInput(attrs={'placeholder': 'Ingrese su numero de cédula (Obligatorio)'}),
             'experiencia_laboral': forms.TextInput(attrs={'placeholder': 'Años de experiencia'}),
             'idioma1': forms.TextInput(attrs={'placeholder': 'Que domina'}),
             'idioma2': forms.TextInput(attrs={'placeholder': 'Que domina'}),
             'cargo': forms.TextInput(attrs={'placeholder': 'Que estaria interesado'}),
         }
 
+    def clean_direccion(self):
+        direccion = self.cleaned_data.get('direccion')
+        if not direccion.replace(' ', '').isalpha():
+            raise forms.ValidationError("La dirección solo puede contener letras y espacios.")
+        if len(direccion) > 30:
+            raise forms.ValidationError("La dirección no puede exceder los 30 caracteres.")
+        return direccion
+    
+    def clean_cedula(self):
+        cedula = self.cleaned_data.get('cedula')
+        if not cedula.isdigit() or len(cedula) != 10:
+            raise forms.ValidationError("La cédula debe contener exactamente 10 dígitos.")
+        # Aquí lógica para validar cédulas ecuatorianas
+        return cedula
+
+    def clean_especialidad(self):
+        especialidad = self.cleaned_data.get('especialidad')
+        
+        if not especialidad.isalnum() or len(especialidad) > 20:
+            raise forms.ValidationError("La especialidad no puede contener símbolos especiales y debe tener máximo 2 caracteres.")
+        
+        return especialidad
+
+    def clean_experiencia_laboral(self):
+        experiencia_laboral = self.cleaned_data.get('experiencia_laboral')
+        
+        if not experiencia_laboral.isalnum() or int(experiencia_laboral) < 0 or int(experiencia_laboral) > 40:
+            raise forms.ValidationError("La experiencia laboral no puede contener símbolos especiales y debe ser un número positivo menor o igual a 40.")
+        
+        return experiencia_laboral
+
+    def clean_idioma1(self):
+        idioma1 = self.cleaned_data.get('idioma1')
+        if not idioma1.isalpha():
+            raise forms.ValidationError("El idioma solo puede contener letras.")
+        return idioma1
+
+    def clean_idioma2(self):
+        idioma2 = self.cleaned_data.get('idioma2')
+        if not idioma2.isalpha():
+            raise forms.ValidationError("El idioma solo puede contener letras.")
+        return idioma2
+        
+    def clean_cargo(self):
+        cargo = self.cleaned_data.get('cargo')
+        if not cargo.isalpha():
+            raise forms.ValidationError("El cargo solo puede contener letras.")
+        return cargo
+
 class UserEntrenadorForm(forms.ModelForm):
     username = forms.CharField(
         max_length=150, 
         required=True, 
         label='Nombre de usuario', 
-        widget=forms.TextInput(attrs={'placeholder': 'Nombre de usuario'}),
+        widget=forms.TextInput(attrs={'aria-label': 'Nombre de usuario:', 'placeholder': 'Evite caracteres especiales (Max. 8 digitos)'}),
         error_messages={'required': '', 'max_length': ''} 
     )
     
@@ -170,18 +300,57 @@ class UserEntrenadorForm(forms.ModelForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'telefono']
         widgets = {
-            'first_name': forms.TextInput(attrs={'placeholder': 'Nombre'}),
-            'last_name': forms.TextInput(attrs={'placeholder': 'Apellido'}),
-            'email': forms.EmailInput(attrs={'placeholder': 'Correo electrónico'}),
-            'telefono': forms.TextInput(attrs={'placeholder': 'Teléfono'}),
+            'first_name': forms.TextInput(attrs={'placeholder': 'Ingrese su Nombre'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Ingrese su Apellido'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Ingrese su Correo electrónico'}),
+            'telefono': forms.TextInput(attrs={'placeholder': 'Ingrese su numero Teléfono'}),
         }
         labels = {
             'first_name': 'Nombre',
             'last_name': 'Apellido',
             'email': 'Correo electrónico',
             'telefono': 'Teléfono',
-            'cedula': 'Cédula',
         }
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("Este nombre de usuario ya existe.")
+        
+        if not username.isalnum() or len(username) > 8:
+            raise forms.ValidationError("El nombre de usuario no puede contener símbolos especiales y debe tener máximo 8 caracteres.")
+        
+        return username
+    
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if not first_name.isalpha():
+            raise forms.ValidationError("El nombre solo puede contener letras.")
+        return first_name.capitalize()
+    
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        if not last_name.isalpha():
+            raise forms.ValidationError("El apellido solo puede contener letras.")
+        return last_name.capitalize()
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not email or '@' not in email or '.' not in email.split('@')[-1]:
+            raise forms.ValidationError("Introduce un correo electrónico válido.")
+        # Opcional: restringir dominios permitidos
+        allowed_domains = ['gmail.com', 'outlook.com', 'yahoo.com']
+        domain = email.split('@')[-1]
+        if domain not in allowed_domains:
+            raise forms.ValidationError(f"El dominio del correo no está permitido. Usa uno de estos: {', '.join(allowed_domains)}.")
+        return email
+    
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+        if not telefono.isdigit() or len(telefono) != 10:
+            raise forms.ValidationError("El teléfono debe contener exactamente 10 dígitos y no incluir caracteres especiales.")
+        return telefono
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -189,7 +358,7 @@ class UserEntrenadorForm(forms.ModelForm):
         user.set_password(self.cleaned_data['password1'])  # Establecer la contraseña
         if commit:
             user.save()
-        return user
+        return user    
 
 class CustomPasswordResetForm(PasswordResetForm):
     def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None):

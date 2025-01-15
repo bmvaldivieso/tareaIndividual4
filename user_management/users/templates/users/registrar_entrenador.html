@@ -37,27 +37,165 @@
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 <h2 class="text-center">Registro</h2>
+
+                {% if messages %}
+                <div class="container mt-3">
+                    {% for message in messages %}
+                    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <form id="registrationForm" method="post" class="p-4 rounded shadow bg-dark text-white">
                     {% csrf_token %}
 
                     <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}">Usuario:</label>
                         {{ user_form.username }}
+                        {% if user_form.username.errors %}
+                        <div style="color: red;">
+                            {% for error in user_form.username.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
+
                     <div class="mb-3">
+                        <label for="{{ form.first_name.id_for_label }}">Nombre:</label>
                         {{ user_form.first_name }}
+                        {% if user_form.first_name.errors %}
+                        <div style="color: red;">
+                            {% for error in user_form.first_name.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
+
                     <div class="mb-3">
+                        <label for="{{ form.last_name.id_for_label }}">Apellido:</label>
                         {{ user_form.last_name }}
+                        {% if user_form.last_name.errors %}
+                        <div style="color: red;">
+                            {% for error in user_form.last_name.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
+
                     <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}">Correo electrónico:</label>
                         {{ user_form.email }}
+                        {% if user_form.email.errors %}
+                        <div style="color: red;">
+                            {% for error in user_form.email.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
+
                     <div class="mb-3">
+                        <label for="{{ form.telefono.id_for_label }}">Teléfono:</label>
                         {{ user_form.telefono }}
+                        {% if user_form.telefono.errors %}
+                        <div style="color: red;">
+                            {% for error in user_form.telefono.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
+
                     <div class="mb-3">
-                        {{ entrenador_form.as_p }}
+                        <label for="{{ form.direccion.id_for_label }}">Especialidad:</label>
+                        {{ entrenador_form.especialidad }}
+                        {% if entrenador_form.especialidad.errors %}
+                        <div style="color: red;">
+                            {% for error in entrenador_form.especialidad.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.direccion.id_for_label }}">Dirección:</label>
+                        {{ entrenador_form.direccion }}
+                        {% if entrenador_form.direccion.errors %}
+                        <div style="color: red;">
+                            {% for error in entrenador_form.direccion.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.cedula.id_for_label }}">Cédula:</label>
+                        {{ entrenador_form.cedula }}
+                        {% if entrenador_form.cedula.errors %}
+                        <div style="color: red;">
+                            {% for error in entrenador_form.cedula.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.cedula.id_for_label }}">Experiencia Laboral:</label>
+                        {{ entrenador_form.experiencia_laboral }}
+                        {% if entrenador_form.experiencia_laboral.errors %}
+                        <div style="color: red;">
+                            {% for error in entrenador_form.experiencia_laboral.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.cedula.id_for_label }}">Idioma1:</label>
+                        {{ entrenador_form.idioma1 }}
+                        {% if entrenador_form.idioma1.errors %}
+                        <div style="color: red;">
+                            {% for error in entrenador_form.idioma1.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.cedula.id_for_label }}">Idioma2:</label>
+                        {{ entrenador_form.idioma2 }}
+                        {% if entrenador_form.idioma2.errors %}
+                        <div style="color: red;">
+                            {% for error in entrenador_form.idioma2.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.cedula.id_for_label }}">Cargo:</label>
+                        {{ entrenador_form.cargo }}
+                        {% if entrenador_form.idioma2.errors %}
+                        <div style="color: red;">
+                            {% for error in entrenador_form.idioma2.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
                     <!-- Campos de las contraseñas al final -->
                     <div class="mb-3">
                         <label for="{{ user_form.password1.id_for_label }}">Contraseña:</label>

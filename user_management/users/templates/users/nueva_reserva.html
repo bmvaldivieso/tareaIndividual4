@@ -74,6 +74,12 @@
             </div>
             <div class="card mx-auto p-4 form-container"
                 style="height: 415px; max-width: 560px; border-radius: 20px; background-color: #212529;">
+                <!-- Mostrar mensaje de error -->
+                {% if error %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+                {% endif %}
                 <form method="POST">
                     {% csrf_token %}
                     <label for="fecha">Fecha:</label>
